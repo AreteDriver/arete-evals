@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>arete-evals · Triage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d0e;
+    --panel: #131618;
+    --panel-2: #181c1f;
+    --line: #23292d;
+    --line-bright: #2f373c;
+    --ink: #e7ece8;
+    --ink-dim: #8a948e;
+    --ink-faint: #4f5854;
+    --accent: #c8ff4d;
+    --accent-dim: #93b836;
+    --pass: #5fb37a;
+    --fail: #e26d5a;
+    --flaky: #d4a64a;
+    --review: #6aa3c9;
+    --unsorted: #6b7370;
+    --shadow: 0 1px 0 rgba(255,255,255,.02) inset, 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    background-image:
+      radial-gradient(at 20% 0%, rgba(200,255,77,.04) 0%, transparent 40%),
+      radial-gradient(at 80% 100%, rgba(106,163,201,.03) 0%, transparent 40%);
+  }
+
+  /* ========== HEADER ========== */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(11,13,14,.85);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .brand h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: -.5px;
+    color: var(--ink);
+  }
+
+  .brand .sub {
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: .15em;
+  }
+
+  .brand .sub::before {
+    content: "·";
+    margin-right: 12px;
+    color: var(--ink-faint);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .stats {
+    display: flex;
+    gap: 16px;
+    margin-right: 16px;
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+
+  .stats .stat strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  button {
+    background: var(--panel);
+    border: 1px solid var(--line-bright);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all .15s ease;
+    letter-spacing: .02em;
+  }
+
+  button:hover {
+    border-color: var(--accent-dim);
+    background: var(--panel-2);
+  }
+
+  button.primary {
+    background: var(--accent);
+    color: #0b0d0e;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  button.primary:hover {
+    background: #d6ff66;
+    border-color: #d6ff66;
+  }
+
+  button.ghost {
+    background: transparent;
+  }
+
+  /* ========== BOARD ========== */
+  .board {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  .column {
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background .15s ease;
+  }
+
+  .column.drag-over {
+    background: var(--panel-2);
+  }
+
+  .column-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+    z-index: 1;
+  }
+
+  .column-header .label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .dot.unsorted { background: var(--unsorted); }
+  .dot.pass    { background: var(--pass); }
+  .dot.fail    { background: var(--fail); }
+  .dot.flaky   { background: var(--flaky); }
+  .dot.review  { background: var(--review); }
+
+  .column-header h2 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    color: var(--ink);
+  }
+
+  .column-header .count {
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .column-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-bright) transparent;
+  }
+
+  .column-body::-webkit-scrollbar { width: 6px; }
+  .column-body::-webkit-scrollbar-track { background: transparent; }
+  .column-body::-webkit-scrollbar-thumb { background: var(--line-bright); }
+
+  /* ========== CARDS ========== */
+  .card {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    cursor: grab;
+    transition: all .12s ease;
+    position: relative;
+  }
+
+  .card:hover {
+    border-color: var(--line-bright);
+    transform: translateY(-1px);
+  }
+
+  .card.dragging {
+    opacity: .4;
+    cursor: grabbing;
+  }
+
+  .card .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    gap: 8px;
+  }
+
+  .card .card-id {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .card .score {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border: 1px solid var(--line-bright);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .score.high { color: var(--pass); border-color: rgba(95,179,122,.4); }
+  .score.mid  { color: var(--flaky); border-color: rgba(212,166,74,.4); }
+  .score.low  { color: var(--fail); border-color: rgba(226,109,90,.4); }
+
+  .card .prompt {
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.45;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card .meta {
+    font-size: 10px;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card .meta .pass-flag {
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-weight: 600;
+  }
+
+  .pass-flag.ok  { color: var(--pass); }
+  .pass-flag.no  { color: var(--fail); }
+
+  .empty {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--ink-faint);
+    font-size: 11px;
+    border: 1px dashed var(--line);
+    margin: 8px;
+  }
+
+  /* ========== MODAL ========== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--line-bright);
+    width: 100%;
+    max-width: 900px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.8);
+  }
+
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -.3px;
+  }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* ========== CASE DETAIL ========== */
+  .detail-section {
+    margin-bottom: 18px;
+  }
+
+  .detail-section h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .detail-section pre {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.55;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .detail-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .detail-meta .meta-pill {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+
+  .detail-meta .meta-pill strong {
+    color: var(--ink);
+  }
+
+  .notes-area {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 12px;
+    min-height: 70px;
+    resize: vertical;
+  }
+
+  .notes-area:focus {
+    outline: none;
+    border-color: var(--accent-dim);
+  }
+
+  /* ========== EXPORT MODAL ========== */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--ink-faint);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all .15s ease;
+  }
+
+  .tab:hover { color: var(--ink-dim); }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .export-area {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.55;
+    min-height: 380px;
+    max-height: 50vh;
+    resize: vertical;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  /* ========== IMPORT ========== */
+  .import-zone {
+    border: 1.5px dashed var(--line-bright);
+    padding: 24px;
+    text-align: center;
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+
+  .import-zone:hover {
+    border-color: var(--accent-dim);
+    color: var(--ink);
+  }
+
+  .import-zone strong { color: var(--ink); }
+
+  #fileInput { display: none; }
+
+  /* ========== TOAST ========== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--panel-2);
+    border: 1px solid var(--accent-dim);
+    color: var(--ink);
+    padding: 10px 16px;
+    font-size: 12px;
+    z-index: 200;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all .25s ease;
+    box-shadow: var(--shadow);
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ========== EMPTY STATE ========== */
+  .empty-board {
+    grid-column: 1 / -1;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    text-align: center;
+    color: var(--ink-dim);
+  }
+
+  .empty-board h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: -.5px;
+  }
+
+  .empty-board p {
+    max-width: 480px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .sample-link {
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .sample-link:hover { color: #d6ff66; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>arete-evals</h1>
+    <span class="sub" id="brandSub">Triage</span>
+  </div>
+  <div class="header-actions">
+    <div class="stats" id="stats"></div>
+    <button class="ghost" onclick="loadSample()">Load sample</button>
+    <button onclick="document.getElementById('fileInput').click()">Import JSON</button>
+    <button class="primary" onclick="openExport()">Export</button>
+  </div>
+</header>
+
+<div class="board" id="board"></div>
+
+<input type="file" id="fileInput" accept=".json,application/json">
+
+<!-- Case detail modal -->
+<div class="modal-backdrop" id="caseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="caseTitle">Case</h3>
+      <button class="ghost" onclick="closeCase()">Close</button>
+    </div>
+    <div class="modal-body" id="caseBody"></div>
+    <div class="modal-footer">
+      <button class="ghost" onclick="closeCase()">Close</button>
+      <button class="primary" onclick="saveNotes()">Save notes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export modal -->
+<div class="modal-backdrop" id="exportModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Export triage</h3>
+      <button class="ghost" onclick="closeExport()">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <div class="tab active" data-tab="json" onclick="switchTab('json')">JSON</div>
+        <div class="tab" data-tab="markdown" onclick="switchTab('markdown')">Markdown</div>
+        <div class="tab" data-tab="prompt" onclick="switchTab('prompt')">Claude Code prompt</div>
+      </div>
+      <div class="tab-content active" data-tab="json">
+        <textarea class="export-area" id="exportJson" readonly></textarea>
+      </div>
+      <div class="tab-content" data-tab="markdown">
+        <textarea class="export-area" id="exportMarkdown" readonly></textarea>
+      </div>
+      <div class="tab-content" data-tab="prompt">
+        <textarea class="export-area" id="exportPrompt" readonly></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="ghost" onclick="closeExport()">Close</button>
+      <button class="primary" onclick="copyExport()">Copy current tab</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+const BUCKETS = [
+  { id: 'unsorted', label: 'Unsorted', dot: 'unsorted' },
+  { id: 'pass',     label: 'Pass',     dot: 'pass' },
+  { id: 'fail',     label: 'Fail',     dot: 'fail' },
+  { id: 'flaky',    label: 'Flaky',    dot: 'flaky' },
+  { id: 'review',   label: 'Needs Review', dot: 'review' }
+];
+
+const STORAGE_KEY = null; // disabled — no browser storage per artifact rules
+
+let cases = []; // see normalizeCase() for shape
+let currentCaseId = null;
+let draggedId = null;
+let runMeta = null; // { suite_name, timestamp, passed, failed, total, pass_rate } when loaded from a run record
+
+/* ============================================================
+   SAMPLE DATA (arete-evals run-record shape)
+   ============================================================ */
+const SAMPLE = {
+  suite_name: "sample-suite",
+  passed: 2,
+  failed: 2,
+  errors: 0,
+  total: 4,
+  pass_rate: 0.5,
+  timestamp: "2026-05-23T00:00:00",
+  results: [
+    {
+      case_id: "s001",
+      case_name: "pass_clean",
+      status: "passed",
+      score: 1.0,
+      output: "{\"decision\": \"Recommend\", \"rationale\": \"Clear matchup advantage.\"}",
+      metrics: { regex_match: 1.0, regex_absence: 1.0 },
+      failure_mode: null,
+      latency_ms: 8420.5,
+      cost_usd: 0.0021,
+      timestamp: "2026-05-23T00:00:01"
+    },
+    {
+      case_id: "s002",
+      case_name: "fail_real_regression",
+      status: "failed",
+      score: 0.33,
+      output: "{\"recommendations\": [{\"player\": \"X\"}], \"drop_candidates\": []}",
+      metrics: { regex_match: 0.0, regex_absence: 1.0 },
+      failure_mode: "wrong_answer",
+      latency_ms: 11203.1,
+      cost_usd: 0.0019,
+      timestamp: "2026-05-23T00:00:02"
+    },
+    {
+      case_id: "s003",
+      case_name: "fail_metric_false_positive",
+      status: "failed",
+      score: 0.83,
+      output: "{\"rationale\": \"I need more context to give you specific recommendations for this week.\"}",
+      metrics: { regex_match: 1.0, regex_absence: 0.0 },
+      failure_mode: "wrong_answer",
+      latency_ms: 12039.2,
+      cost_usd: 0.0018,
+      timestamp: "2026-05-23T00:00:03"
+    },
+    {
+      case_id: "s004",
+      case_name: "pass_with_caveat",
+      status: "passed",
+      score: 0.91,
+      output: "{\"decision\": \"Analysis\", \"rationale\": \"Trending upward over last 4 weeks.\"}",
+      metrics: { regex_match: 1.0, regex_absence: 1.0 },
+      failure_mode: null,
+      latency_ms: 9120.7,
+      cost_usd: 0.0020,
+      timestamp: "2026-05-23T00:00:04"
+    }
+  ]
+};
+
+/* ============================================================
+   IMPORT
+   ============================================================ */
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      ingest(data);
+      toast(`Loaded ${cases.length} cases`);
+    } catch (err) {
+      toast('Invalid JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // allow re-import same file
+});
+
+function ingest(data) {
+  // Accept three shapes:
+  //   1. arete-evals run record: { suite_name, results: [...], ... }
+  //   2. Bare array of cases (legacy / hand-rolled)
+  //   3. { cases: [...] } wrapper
+  let rows;
+  if (data && Array.isArray(data.results)) {
+    runMeta = {
+      suite_name: data.suite_name || null,
+      timestamp: data.timestamp || null,
+      passed: data.passed,
+      failed: data.failed,
+      errors: data.errors,
+      skipped: data.skipped,
+      total: data.total,
+      pass_rate: data.pass_rate,
+      total_score: data.total_score
+    };
+    rows = data.results;
+  } else if (Array.isArray(data)) {
+    runMeta = null;
+    rows = data;
+  } else if (data && Array.isArray(data.cases)) {
+    runMeta = null;
+    rows = data.cases;
+  } else {
+    throw new Error('Expected run record { results: [...] } or JSON array');
+  }
+  cases = rows.map((c, i) => normalizeCase(c, i));
+  cases.forEach(c => {
+    if (c.bucket && c.bucket !== 'unsorted') return;
+    // Pre-seed from status when available, else from pass flag.
+    // failed/errors go to 'review' (human verdict needed — could be real bug or eval bug),
+    // passed goes to 'pass'.
+    if (c.status === 'passed') c.bucket = 'pass';
+    else if (c.status === 'failed') c.bucket = 'review';
+    else if (c.status === 'errors' || c.status === 'error') c.bucket = 'review';
+    else if (c.pass === true) c.bucket = 'pass';
+    else if (c.pass === false) c.bucket = 'review';
+    else c.bucket = 'unsorted';
+  });
+  updateBrand();
+  render();
+}
+
+function updateBrand() {
+  const sub = document.getElementById('brandSub');
+  if (!sub) return;
+  if (runMeta && runMeta.suite_name) {
+    const parts = [runMeta.suite_name];
+    if (runMeta.timestamp) parts.push(runMeta.timestamp.split('T')[0]);
+    sub.textContent = parts.join(' · ');
+  } else {
+    sub.textContent = 'Triage';
+  }
+}
+
+function normalizeCase(c, idx) {
+  const id = c.case_id || c.id || `case-${idx + 1}`;
+  const name = c.case_name || c.name || id;
+  const status = c.status || null;
+  const score = typeof c.score === 'number' ? c.score : null;
+  let pass;
+  if (status === 'passed') pass = true;
+  else if (status === 'failed' || status === 'error' || status === 'errors') pass = false;
+  else if (typeof c.pass === 'boolean') pass = c.pass;
+  else if (typeof c.passed === 'boolean') pass = c.passed;
+  else pass = null;
+  return {
+    id,
+    name,
+    status,
+    prompt: c.prompt || c.input || c.question || '',
+    expected: c.expected || c.expected_output || c.target || '',
+    actual: c.actual || c.actual_output || c.response || c.output || '',
+    score,
+    pass,
+    metrics: c.metrics && typeof c.metrics === 'object' ? c.metrics : null,
+    failure_mode: c.failure_mode || null,
+    latency_ms: typeof c.latency_ms === 'number' ? c.latency_ms : null,
+    cost_usd: typeof c.cost_usd === 'number' ? c.cost_usd : null,
+    tokens_used: typeof c.tokens_used === 'number' ? c.tokens_used : null,
+    rubric_band: c.rubric_band || null,
+    rubric_scores: c.rubric_scores && typeof c.rubric_scores === 'object' ? c.rubric_scores : null,
+    bucket: c.bucket || 'unsorted',
+    notes: c.notes || ''
+  };
+}
+
+function loadSample() {
+  ingest(SAMPLE);
+  toast('Loaded sample run record');
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  if (cases.length === 0) {
+    board.innerHTML = `
+      <div class="empty-board">
+        <h2>No run loaded</h2>
+        <p>Import an arete-evals run record from <code>results/*.json</code> (shape: <code>{suite_name, results: [...]}</code>). Cases pre-sort by <code>status</code> — passed → Pass, failed/errors → Needs Review. Or <span class="sample-link" onclick="loadSample()">load a sample run</span> to see the flow.</p>
+        <button onclick="document.getElementById('fileInput').click()">Import JSON</button>
+      </div>`;
+    updateStats();
+    return;
+  }
+
+  board.style.gridTemplateColumns = `repeat(${BUCKETS.length}, 1fr)`;
+
+  BUCKETS.forEach(b => {
+    const col = document.createElement('div');
+    col.className = 'column';
+    col.dataset.bucket = b.id;
+    col.addEventListener('dragover', handleDragOver);
+    col.addEventListener('dragleave', handleDragLeave);
+    col.addEventListener('drop', handleDrop);
+
+    const inBucket = cases.filter(c => c.bucket === b.id);
+
+    col.innerHTML = `
+      <div class="column-header">
+        <div class="label">
+          <span class="dot ${b.dot}"></span>
+          <h2>${b.label}</h2>
+        </div>
+        <span class="count">${inBucket.length}</span>
+      </div>
+      <div class="column-body"></div>`;
+
+    const body = col.querySelector('.column-body');
+    if (inBucket.length === 0) {
+      body.innerHTML = `<div class="empty">drop cases here</div>`;
+    } else {
+      inBucket.forEach(c => body.appendChild(renderCard(c)));
+    }
+
+    board.appendChild(col);
+  });
+
+  updateStats();
+}
+
+function renderCard(c) {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.draggable = true;
+  el.dataset.id = c.id;
+
+  const scoreClass = c.score === null ? '' :
+    c.score >= 0.75 ? 'high' :
+    c.score >= 0.45 ? 'mid' : 'low';
+
+  const scoreStr = c.score === null ? '—' : c.score.toFixed(2);
+  const passFlag = c.pass === null ? '' :
+    c.pass ? `<span class="pass-flag ok">pass</span>` :
+             `<span class="pass-flag no">fail</span>`;
+
+  // Show which gates failed (metric value < 1.0) inline
+  let failedGates = '';
+  if (c.metrics) {
+    const failed = Object.entries(c.metrics).filter(([, v]) => typeof v === 'number' && v < 1.0);
+    if (failed.length > 0) {
+      failedGates = `<span class="pass-flag no" title="failed metrics">⚠ ${failed.map(([k]) => k).join(', ')}</span>`;
+    }
+  }
+  const cardLabel = c.name || c.id;
+  const previewText = c.prompt || c.actual || '(no preview)';
+
+  el.innerHTML = `
+    <div class="card-head">
+      <span class="card-id">${escapeHtml(cardLabel)}</span>
+      <span class="score ${scoreClass}">${scoreStr}</span>
+    </div>
+    <div class="prompt">${escapeHtml(truncate(previewText, 180))}</div>
+    <div class="meta">
+      ${passFlag}
+      ${failedGates}
+      ${c.failure_mode ? `<span title="failure mode">${escapeHtml(c.failure_mode)}</span>` : ''}
+      ${c.notes ? '<span title="has notes">◆ notes</span>' : ''}
+    </div>`;
+
+  el.addEventListener('dragstart', handleDragStart);
+  el.addEventListener('dragend', handleDragEnd);
+  el.addEventListener('click', () => openCase(c.id));
+
+  return el;
+}
+
+function updateStats() {
+  const counts = Object.fromEntries(BUCKETS.map(b => [b.id, 0]));
+  cases.forEach(c => counts[c.bucket] = (counts[c.bucket] || 0) + 1);
+  const total = cases.length;
+  const sorted = total - (counts.unsorted || 0);
+  const pct = total ? Math.round(sorted / total * 100) : 0;
+
+  document.getElementById('stats').innerHTML = `
+    <span class="stat"><strong>${total}</strong> total</span>
+    <span class="stat"><strong>${sorted}</strong> triaged</span>
+    <span class="stat"><strong>${pct}%</strong> complete</span>`;
+}
+
+/* ============================================================
+   DRAG & DROP
+   ============================================================ */
+function handleDragStart(e) {
+  draggedId = e.currentTarget.dataset.id;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.column.drag-over').forEach(c => c.classList.remove('drag-over'));
+  draggedId = null;
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  if (e.currentTarget.contains(e.relatedTarget)) return;
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!draggedId) return;
+  const newBucket = e.currentTarget.dataset.bucket;
+  const c = cases.find(x => x.id === draggedId);
+  if (c && c.bucket !== newBucket) {
+    c.bucket = newBucket;
+    render();
+  }
+}
+
+/* ============================================================
+   CASE DETAIL MODAL
+   ============================================================ */
+function openCase(id) {
+  const c = cases.find(x => x.id === id);
+  if (!c) return;
+  currentCaseId = id;
+
+  const scoreStr = c.score === null ? '—' : c.score.toFixed(3);
+  const statusStr = c.status || (c.pass === null ? '—' : (c.pass ? 'passed' : 'failed'));
+
+  document.getElementById('caseTitle').textContent = c.name ? `${c.name}  ·  ${c.id}` : c.id;
+
+  let metricsHtml = '';
+  if (c.metrics && Object.keys(c.metrics).length > 0) {
+    const rows = Object.entries(c.metrics).map(([k, v]) => {
+      const val = typeof v === 'number' ? v.toFixed(2) : String(v);
+      const cls = typeof v === 'number' && v < 1.0 ? 'no' : 'ok';
+      return `<tr><td><code>${escapeHtml(k)}</code></td><td><span class="pass-flag ${cls}">${val}</span></td></tr>`;
+    }).join('');
+    metricsHtml = `
+      <div class="detail-section">
+        <h4>Metrics</h4>
+        <table style="width:100%; border-collapse: collapse; font-size: 12px;">
+          ${rows}
+        </table>
+      </div>`;
+  }
+
+  let rubricHtml = '';
+  if (c.rubric_scores && Object.keys(c.rubric_scores).length > 0) {
+    const rows = Object.entries(c.rubric_scores).map(([k, v]) => {
+      const val = typeof v === 'number' ? v.toFixed(2) : String(v);
+      return `<tr><td><code>${escapeHtml(k)}</code></td><td>${val}</td></tr>`;
+    }).join('');
+    rubricHtml = `
+      <div class="detail-section">
+        <h4>Rubric ${c.rubric_band ? `(${escapeHtml(c.rubric_band)})` : ''}</h4>
+        <table style="width:100%; border-collapse: collapse; font-size: 12px;">
+          ${rows}
+        </table>
+      </div>`;
+  }
+
+  const tagPills = [];
+  if (c.failure_mode) tagPills.push(`<span class="meta-pill"><strong>Failure</strong> · ${escapeHtml(c.failure_mode)}</span>`);
+  if (c.latency_ms !== null) tagPills.push(`<span class="meta-pill"><strong>Latency</strong> · ${(c.latency_ms / 1000).toFixed(2)}s</span>`);
+  if (c.cost_usd !== null && c.cost_usd > 0) tagPills.push(`<span class="meta-pill"><strong>Cost</strong> · $${c.cost_usd.toFixed(4)}</span>`);
+  if (c.tokens_used) tagPills.push(`<span class="meta-pill"><strong>Tokens</strong> · ${c.tokens_used}</span>`);
+
+  document.getElementById('caseBody').innerHTML = `
+    <div class="detail-meta">
+      <span class="meta-pill"><strong>Score</strong> · ${scoreStr}</span>
+      <span class="meta-pill"><strong>Status</strong> · ${escapeHtml(statusStr)}</span>
+      <span class="meta-pill"><strong>Bucket</strong> · ${c.bucket}</span>
+      ${tagPills.join('')}
+    </div>
+    ${c.prompt ? `
+    <div class="detail-section">
+      <h4>Prompt</h4>
+      <pre>${escapeHtml(c.prompt)}</pre>
+    </div>` : ''}
+    ${c.expected ? `
+    <div class="detail-section">
+      <h4>Expected</h4>
+      <pre>${escapeHtml(c.expected)}</pre>
+    </div>` : ''}
+    <div class="detail-section">
+      <h4>Output</h4>
+      <pre>${escapeHtml(c.actual || '(empty)')}</pre>
+    </div>
+    ${metricsHtml}
+    ${rubricHtml}
+    <div class="detail-section">
+      <h4>Triage notes</h4>
+      <textarea class="notes-area" id="notesInput" placeholder="Real bug, or eval bug? What's the fix? What to retest?">${escapeHtml(c.notes || '')}</textarea>
+    </div>`;
+
+  document.getElementById('caseModal').classList.add('open');
+}
+
+function closeCase() {
+  document.getElementById('caseModal').classList.remove('open');
+  currentCaseId = null;
+}
+
+function saveNotes() {
+  const c = cases.find(x => x.id === currentCaseId);
+  if (!c) return;
+  const notes = document.getElementById('notesInput').value;
+  c.notes = notes;
+  render();
+  closeCase();
+  toast('Notes saved');
+}
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
+function openExport() {
+  if (cases.length === 0) {
+    toast('Nothing to export — load cases first');
+    return;
+  }
+  document.getElementById('exportJson').value = buildJsonExport();
+  document.getElementById('exportMarkdown').value = buildMarkdownExport();
+  document.getElementById('exportPrompt').value = buildPromptExport();
+  document.getElementById('exportModal').classList.add('open');
+}
+
+function closeExport() {
+  document.getElementById('exportModal').classList.remove('open');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+}
+
+function copyExport() {
+  const active = document.querySelector('.tab-content.active textarea');
+  if (!active) return;
+  navigator.clipboard.writeText(active.value).then(
+    () => toast('Copied to clipboard'),
+    () => toast('Copy failed — select and copy manually')
+  );
+}
+
+function buildJsonExport() {
+  const payload = {
+    suite_name: runMeta && runMeta.suite_name || null,
+    run_timestamp: runMeta && runMeta.timestamp || null,
+    triaged_at: new Date().toISOString(),
+    summary: Object.fromEntries(BUCKETS.map(b => [b.id, cases.filter(c => c.bucket === b.id).length])),
+    cases: cases.map(c => ({
+      case_id: c.id,
+      case_name: c.name,
+      status: c.status,
+      score: c.score,
+      failure_mode: c.failure_mode,
+      metrics: c.metrics,
+      triage: {
+        bucket: c.bucket,
+        notes: c.notes || null
+      }
+    }))
+  };
+  return JSON.stringify(payload, null, 2);
+}
+
+function buildMarkdownExport() {
+  const date = new Date().toISOString().split('T')[0];
+  const counts = Object.fromEntries(BUCKETS.map(b => [b.id, 0]));
+  cases.forEach(c => counts[c.bucket]++);
+
+  const suite = runMeta && runMeta.suite_name ? runMeta.suite_name : 'unknown-suite';
+  let md = `# Eval Triage — ${suite}\n\n`;
+  md += `**Triaged:** ${date}  \n`;
+  if (runMeta && runMeta.timestamp) md += `**Run:** ${runMeta.timestamp}  \n`;
+  md += `**Total cases:** ${cases.length}\n\n`;
+  md += `## Summary\n\n`;
+  md += `| Bucket | Count | % |\n`;
+  md += `|---|---:|---:|\n`;
+  BUCKETS.forEach(b => {
+    const pct = cases.length ? Math.round(counts[b.id] / cases.length * 100) : 0;
+    md += `| ${b.label} | ${counts[b.id]} | ${pct}% |\n`;
+  });
+  md += `\n---\n\n`;
+
+  BUCKETS.forEach(b => {
+    const inBucket = cases.filter(c => c.bucket === b.id);
+    if (inBucket.length === 0) return;
+    md += `## ${b.label} (${inBucket.length})\n\n`;
+    inBucket.forEach(c => {
+      const scoreStr = c.score === null ? '—' : c.score.toFixed(2);
+      const label = c.name ? `${c.name} (\`${c.id}\`)` : `\`${c.id}\``;
+      md += `### ${label} — score ${scoreStr}\n\n`;
+      if (c.failure_mode) md += `**Failure mode:** ${c.failure_mode}\n\n`;
+      if (c.metrics) {
+        const failed = Object.entries(c.metrics).filter(([, v]) => typeof v === 'number' && v < 1.0);
+        if (failed.length) {
+          md += `**Failing gates:** ${failed.map(([k, v]) => `\`${k}\`=${v}`).join(', ')}\n\n`;
+        }
+      }
+      if (c.prompt)   md += `**Prompt:** ${truncate(c.prompt, 280)}\n\n`;
+      if (c.expected) md += `**Expected:** ${truncate(c.expected, 280)}\n\n`;
+      if (c.actual)   md += `**Output:** ${truncate(c.actual, 280)}\n\n`;
+      if (c.notes)    md += `**Triage notes:** ${c.notes}\n\n`;
+      md += `---\n\n`;
+    });
+  });
+
+  return md;
+}
+
+function buildPromptExport() {
+  const counts = Object.fromEntries(BUCKETS.map(b => [b.id, []]));
+  cases.forEach(c => counts[c.bucket].push(c));
+
+  const suite = runMeta && runMeta.suite_name ? runMeta.suite_name : 'eval';
+  let p = `# ${suite} triage — handoff for Claude Code\n\n`;
+  p += `Triaged ${cases.length} cases from suite \`${suite}\``;
+  if (runMeta && runMeta.timestamp) p += ` (run ${runMeta.timestamp})`;
+  p += `. Disposition below. For each Fail / Needs Review case, separate **real product regressions** from **eval-metric false positives** — the harness has caught the latter before (see arete-evals case study).\n\n`;
+  p += `## Disposition\n\n`;
+
+  BUCKETS.forEach(b => {
+    if (b.id === 'unsorted' && counts[b.id].length === 0) return;
+    p += `### ${b.label} (${counts[b.id].length})\n\n`;
+    if (counts[b.id].length === 0) {
+      p += `_(none)_\n\n`;
+      return;
+    }
+    counts[b.id].forEach(c => {
+      const scoreStr = c.score === null ? '—' : c.score.toFixed(2);
+      const label = c.name ? `${c.name} (\`${c.id}\`)` : c.id;
+      const previewSrc = c.prompt || c.actual || '';
+      p += `- **${label}** (score ${scoreStr}`;
+      if (c.failure_mode) p += `, ${c.failure_mode}`;
+      if (c.metrics) {
+        const failed = Object.entries(c.metrics).filter(([, v]) => typeof v === 'number' && v < 1.0).map(([k]) => k);
+        if (failed.length) p += `, failing: ${failed.join(', ')}`;
+      }
+      p += `): ${truncate(previewSrc, 100)}\n`;
+      if (c.notes) p += `  - Note: ${c.notes}\n`;
+    });
+    p += `\n`;
+  });
+
+  p += `## What I need from you\n\n`;
+  const failCount = counts.fail.length;
+  const flakyCount = counts.flaky.length;
+  const reviewCount = counts.review.length;
+  let step = 1;
+
+  if (reviewCount > 0) {
+    p += `${step++}. **Needs Review (${reviewCount}):** For each case, decide *real bug* vs *eval-metric false positive*. If false positive, propose the corrected metric pattern (anchor to the actual leak shape, not the surface word). If real bug, propose a root cause and fix.\n`;
+  }
+  if (failCount > 0) {
+    p += `${step++}. **Fail (${failCount}):** Confirmed regressions. For each, propose a root cause hypothesis and a concrete fix — prompt edit, validator change, or product code change. Reference the actual output, not just the score.\n`;
+  }
+  if (flakyCount > 0) {
+    p += `${step++}. **Flaky (${flakyCount}):** Re-run each 3 more times. Report pass rate + variance. If high, propose a determinism fix (lower temperature, tighter schema, stricter rubric).\n`;
+  }
+  p += `\nReturn a single Markdown report I can paste into the run record's triage notes.\n`;
+
+  return p;
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function truncate(s, n) {
+  if (!s) return '';
+  return s.length > n ? s.slice(0, n - 1) + '…' : s;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   KEYBOARD
+   ============================================================ */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeCase();
+    closeExport();
+  }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+render();
+</script>
+
+</body>
+</html>

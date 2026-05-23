@@ -12,6 +12,7 @@ The premise: a harness with passing self-tests has caught nothing. Eval *enginee
 suites/    eval suite definitions (YAML)
 results/   run records — raw model output + per-case metric scores
 scripts/   reproducible verification
+tools/     local triage UI (open tools/triage.html in a browser, import a results/*.json)
 ```
 
 ## Case study: the first live run of `benchgoblins-ask`
