@@ -2,7 +2,7 @@
 
 LLM evaluation suites — and the records of what running them found.
 
-The evaluation **harness** lives in [`animus-forge`](https://github.com/AreteDriver/animus-docs): suites, structural and rubric metrics, A/B compare with bootstrap CI, and two failure taxonomies. This repository holds the **suites run against real products** and the **run records** — including the runs where the eval itself turned out to be wrong.
+The evaluation **harness** lives in **`evalcore`** — a standalone, installable engine extracted from animus-forge: suites, structural and rubric metrics, A/B compare with bootstrap CI, and two failure taxonomies. This repository holds the **suites run against real products** and the **run records** — including the runs where the eval itself turned out to be wrong. Install the engine with `pip install -e ../evalcore` (see `requirements.txt`).
 
 The premise: a harness with passing self-tests has caught nothing. Eval *engineering* is building the framework. Eval *practice* is running it against messy production output and acting on the verdict. This repo is the practice.
 

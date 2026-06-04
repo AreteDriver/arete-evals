@@ -1,0 +1,5 @@
+# arete-evals consumes the evalcore engine (harness + metrics + compare + taxonomies).
+# Until evalcore is published to PyPI, install it locally:
+#   pip install -e ../evalcore
+evalcore>=0.1.0
+pyyaml>=6.0.0
