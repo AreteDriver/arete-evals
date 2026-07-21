@@ -1,0 +1,3 @@
+# Mark evaluation result HTML as generated so GitHub Linguist ignores it for language stats
+results/*.html linguist-generated=true
+tools/triage.html linguist-generated=true
