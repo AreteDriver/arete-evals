@@ -35,3 +35,5 @@ for r in data["results"]:
 print()
 print(f"absence-gate false-positive count: {fails}/20")
 print("RESULT:", "all clean — fix holds" if fails == 0 else f"{fails} flagged — inspect")
+if fails:
+    raise SystemExit(1)
