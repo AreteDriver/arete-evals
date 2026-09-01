@@ -2,37 +2,33 @@
 
 | Attribute | Value |
 |-----------|-------|
-| Status | **PARTIAL** |
-| Last verified | 2026-07-16 |
-| Installable? | Partial — engine is installable, suites are research artifacts |
-| Tested? | Engine self-tests pass; live-run records verified (see `results/`) |
-| Documented? | README + case studies; no hosted docs yet |
+| Status | **PARTIAL — public evaluation evidence repository** |
+| Last verified | 2026-08-31 |
+| Installable? | Supporting requirements only; the evaluation engine is not included |
+| Re-runnable? | Not end-to-end from this repository alone |
+| Documented? | README, methodology, suites, run record, and triage record |
 
-## What Works
+## What works
 
-- **Eval Engine (`evalcore`):** Structural metrics, rubric scoring, A/B compare with bootstrap CI, two failure taxonomies (technical + content)
-- **Live Run Records:** `benchgoblins-ask` suite run against production — 15/20 passed, 5 failed, all failures analyzed and explained
-- **Triage UI:** Browser-based tool for inspecting run records (`tools/triage.html`)
-- **Integration:** Designed as measurement layer for Animus Forge — every completed Forge task spawns an eval run
+- A public suite definition for the documented BenchGoblins Ask evaluation.
+- A retained JSON run record and human-readable triage record.
+- A browser-based triage helper for inspecting run records.
+- A methodology that separates evaluation-framework construction from evaluation practice.
 
-## What Doesn't Work Yet
+## What does not work yet
 
-- No PyPI package for `evalcore` (install from sibling directory)
-- No automated CI for suite execution against live products
-- No hosted dashboard for eval trends
-- `config_loader` and `rate_limiter` test cases need fixing before autonomous weekly calibrations
+- The referenced evaluation harness is not packaged in this repository.
+- There is no automated CI that reruns suites against live public projects.
+- There is no hosted trend dashboard.
+- The recorded result demonstrates one documented run; it is not a general performance claim.
 
-## Install
+## 60-second inspection
 
-```bash
-# Engine
-cd evalcore  # sibling to this repo
-pip install -e .
+1. Read `results/benchgoblins-ask-6ea664d3.triage.md`.
+2. Inspect `results/benchgoblins-ask-6ea664d3.json`.
+3. Compare the evidence with `suites/benchgoblins-ask.yaml`.
+4. Review `METHODOLOGY.md`.
 
-# This repo (suites + records)
-pip install -r requirements.txt
-```
+## Scope
 
-## Relationship to Animus
-
-This repository is the **eval practice** companion to Animus. The harness lives in `evalcore`; this repo holds the suites, run records, and case studies that prove the harness catches real regressions.
+This is independent public project work. It demonstrates evaluation practice and evidence discipline; it is not presented as employer production ownership, an industry benchmark, or a standalone evaluation platform.
