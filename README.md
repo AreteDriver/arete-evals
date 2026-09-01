@@ -2,9 +2,25 @@
 
 LLM evaluation suites — and the records of what running them found.
 
-The evaluation **harness** lives in **`evalcore`** — a standalone, installable engine extracted from animus-forge: suites, structural and rubric metrics, A/B compare with bootstrap CI, and two failure taxonomies. This repository holds the **suites run against real products** and the **run records** — including the runs where the eval itself turned out to be wrong. Install the engine with `pip install -e ../evalcore` (see `requirements.txt`).
+The evaluation **harness** lives in **`evalcore`** — a standalone, installable engine extracted from animus-forge: suites, structural and rubric metrics, A/B compare with bootstrap CI, and two failure taxonomies. This repository holds the **suites run against public projects** and the **run records** — including the runs where the eval itself turned out to be wrong. Install the engine with `pip install -e ../evalcore` (see `requirements.txt`).
 
 The premise: a harness with passing self-tests has caught nothing. Eval *engineering* is building the framework. Eval *practice* is running it against messy production output and acting on the verdict. This repo is the practice.
+
+## 60-second review
+
+1. Read the [triage record](results/benchgoblins-ask-6ea664d3.triage.md) for a concrete failed-evaluation investigation.
+2. Inspect the corresponding [run record](results/benchgoblins-ask-6ea664d3.json).
+3. Review the [suite definition](suites/benchgoblins-ask.yaml) and [methodology](METHODOLOGY.md).
+
+## What this demonstrates
+
+- Evaluation as an operating practice: define a suite, run it, inspect failures, correct the measurement, and retain the evidence.
+- Rubric design, structured run records, failure analysis, and disciplined limits on what a result proves.
+- Technical communication about false confidence and measurement quality.
+
+## Current status and limitations
+
+This repository contains public suites and run records; it is not a standalone packaged evaluation engine. The referenced harness is not included here, there is no hosted dashboard, and the recorded results apply only to the documented runs. See [Project Status](STATUS.md) and [Roadmap](ROADMAP.md).
 
 ## Layout
 
@@ -77,7 +93,7 @@ Verified the controlled way — applied the new pattern to the exact 20 stored r
 
 The first live run of an eval harness mostly finds bugs in the eval harness. That is not the harness failing — that is the harness finally earning the right to be trusted.
 
-A metric you have never run against real production output is a hypothesis, not a guardrail. Mine was a reasonable hypothesis — "a leaked JSON key contains the word `recommendations`" — that was true and useless, because so does every sentence about recommendations. I would not have found that by adding more unit tests. The tests all passed. I found it because I ran the thing, against reality, and read the five things it told me were wrong.
+A metric you have never run against public-project output is a hypothesis, not a guardrail. Mine was a reasonable hypothesis — "a leaked JSON key contains the word `recommendations`" — that was true and useless, because so does every sentence about recommendations. I would not have found that by adding more unit tests. The tests all passed. I found it because I ran the thing, against reality, and read the five things it told me were wrong.
 
 Ship the eval. Then run it against production and be ready for the first verdict to be about *you*.
 
