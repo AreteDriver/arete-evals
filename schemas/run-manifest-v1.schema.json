@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aretedriver.dev/schemas/arete-evals/run-manifest-v1.schema.json",
+  "title": "Arete Evals Immutable Run Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "bundle_id", "created_at", "project", "suite",
+    "suite_hash", "dataset_version", "dataset_hash", "engine", "mode",
+    "outputs_truncated", "privacy", "treatments", "verdict", "artifacts"
+  ],
+  "properties": {
+    "schema_version": {"const": "run-manifest-v1"},
+    "bundle_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "project": {"type": "string"},
+    "suite": {"type": "string"},
+    "suite_hash": {"type": "string"},
+    "dataset_version": {"type": "string"},
+    "dataset_hash": {"type": "string"},
+    "engine": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {"name": {"type": "string"}, "version": {"type": "string"}}
+    },
+    "mode": {"enum": ["replay", "http", "target"]},
+    "revision": {"type": ["string", "null"]},
+    "outputs_truncated": {"const": false},
+    "privacy": {"type": "object"},
+    "treatments": {"type": "object"},
+    "verdict": {"enum": ["pass", "warn", "fail"]},
+    "artifacts": {"type": "object"}
+  }
+}

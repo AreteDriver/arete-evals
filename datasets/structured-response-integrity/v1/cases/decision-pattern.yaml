@@ -1,0 +1,7 @@
+id: decision-pattern
+labels: {slice: case-specific, validity: expected-valid}
+input:
+  query: Explicitly accept or reject the proposed action.
+expected:
+  rationale_min_chars: 20
+  decision_pattern: "^(accept|reject)\\b"

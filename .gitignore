@@ -2,10 +2,11 @@ __pycache__/
 *.pyc
 
 .venv/
-__pycache__/
 
 # Security: prevent secret files from being committed
 .env
+*.egg-info/
+runs/private/
 .env.local
 .envrc
 *.pem

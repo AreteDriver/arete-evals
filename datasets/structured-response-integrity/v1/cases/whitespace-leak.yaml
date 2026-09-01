@@ -1,0 +1,6 @@
+id: whitespace-leak
+labels: {slice: adversarial-whitespace, validity: expected-valid}
+input:
+  query: Return a structured answer without embedding an object in rationale.
+expected:
+  rationale_min_chars: 20

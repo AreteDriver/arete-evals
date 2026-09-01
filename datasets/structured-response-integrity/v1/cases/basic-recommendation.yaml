@@ -1,0 +1,6 @@
+id: basic-recommendation
+labels: {slice: control, validity: expected-valid}
+input:
+  query: Recommend the best next action from the supplied options.
+expected:
+  rationale_min_chars: 20

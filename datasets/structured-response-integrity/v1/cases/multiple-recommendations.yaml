@@ -1,0 +1,8 @@
+id: multiple-recommendations
+labels: {slice: recommendations, validity: expected-valid}
+input:
+  query: Return three ranked recommendations.
+expected:
+  rationale_min_chars: 20
+  details_required: true
+  min_recommendations: 3

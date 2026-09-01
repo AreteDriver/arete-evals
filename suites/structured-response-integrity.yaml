@@ -1,0 +1,52 @@
+project: arete-evals
+suite: structured-response-integrity
+dataset: ../datasets/structured-response-integrity/v1
+dataset_version: v1
+mode_default: replay
+replay_fixtures: ../fixtures/structured-response-integrity-v1.yaml
+n_samples: 1
+concurrency: 1
+retry:
+  max_attempts: 2
+  backoff_base: 0.25
+  backoff_max: 1.0
+  jitter: 0.1
+adapter:
+  type: public_project_http
+  url_env: ARETE_EVAL_TARGET_URL
+  token_env: ARETE_EVAL_TARGET_TOKEN
+  token_required: false
+  timeout_seconds: 30
+graders:
+  - type: structured_response
+    name: response_contract
+    field: output.response
+variants:
+  baseline:
+    model: recorded-fixture
+    prompt_version: regression-v0
+    treatment:
+      id: baseline
+      version: "1"
+      kind: baseline
+      config: {}
+  candidate:
+    model: recorded-fixture
+    prompt_version: structured-fix-v1
+    treatment:
+      id: structured-output-fix
+      version: "1"
+      kind: instructions
+      config:
+        response_contract: decision-rationale-details-v1
+thresholds:
+  guardrails:
+    - metric: contract_pass
+      min: 1.0
+      must_not_decrease: true
+    - metric: no_serialized_json_leak
+      min: 1.0
+  win_metric: contract_pass
+  win_higher_is_better: true
+  win_min_delta: 0.0
+  on_regression: fail

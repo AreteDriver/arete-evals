@@ -1,0 +1,57 @@
+project: context-hygiene
+suite: deep-analysis-finding-recall
+dataset: ../datasets/context-hygiene-deep-analysis/v1
+dataset_version: v1
+mode_default: replay
+replay_fixtures: ../fixtures/context-hygiene-deep-analysis-v1.yaml
+n_samples: 3
+concurrency: 1
+retry:
+  max_attempts: 1
+  backoff_base: 0.25
+  backoff_max: 1.0
+  jitter: 0.0
+adapter:
+  type: context_hygiene_cli
+  executable_env: CONTEXT_HYGIENE_EXECUTABLE
+  timeout_seconds: 180
+graders:
+  - type: context_hygiene_report
+    name: hygiene_report_contract
+    field: output.report
+variants:
+  baseline:
+    model: context-hygiene-fast@0.3.3
+    prompt_version: heuristics@0.3.3
+    treatment:
+      id: fast-analysis
+      version: "0.3.3"
+      kind: baseline
+      config:
+        analysis_mode: fast
+  candidate:
+    model: claude-sonnet-4-6
+    prompt_version: context-hygiene-prompts@2788404034a5a857baa817138b2012549fea1f29
+    treatment:
+      id: deep-analysis
+      version: "0.3.3"
+      kind: runtime
+      config:
+        analysis_mode: deep
+        provider: anthropic
+        max_tokens: 1024
+        provider_max_retries: 0
+thresholds:
+  guardrails:
+    - metric: report_schema_valid
+      min: 1.0
+      must_not_decrease: true
+    - metric: finding_references_valid
+      min: 1.0
+      must_not_decrease: true
+    - metric: expected_findings_recalled
+      min: 1.0
+  win_metric: expected_findings_recalled
+  win_higher_is_better: true
+  win_min_delta: 0.25
+  on_regression: fail

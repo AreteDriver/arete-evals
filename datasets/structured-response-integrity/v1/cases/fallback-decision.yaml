@@ -1,0 +1,6 @@
+id: fallback-decision
+labels: {slice: fallback, validity: expected-valid}
+input:
+  query: Make a concrete decision instead of returning a fallback.
+expected:
+  rationale_min_chars: 20

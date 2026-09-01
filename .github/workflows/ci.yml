@@ -25,10 +25,26 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-ci.txt
       - name: Install validation dependency
-        run: python -m pip install --require-hashes -r requirements-ci.txt
+        run: |
+          python -m pip install -r requirements-ci.txt
+          python -m pip install --no-deps --no-build-isolation -e .
       - name: Compile validation scripts
-        run: python -m compileall -q scripts
+        run: python -m compileall -q arete_evals scripts tests
+      - name: Lint and formatting
+        run: |
+          ruff format --check arete_evals tests scripts
+          ruff check arete_evals tests scripts
       - name: Validate suites and run records
         run: python scripts/validate_repo.py
       - name: Reproduce stored metric fix
         run: python scripts/verify_fix.py
+      - name: Run unit and integration tests
+        run: python -m unittest discover -s tests -v
+      - name: Build canonical replay bundle
+        run: |
+          python -m arete_evals.cli run \
+            --suite suites/structured-response-integrity.yaml \
+            --out /tmp/arete-evals-runs \
+            --bundle-id ci-replay \
+            --created-at 2026-08-31T12:00:00+00:00
+          python -c "import json; from pathlib import Path; p=Path('/tmp/arete-evals-runs/ci-replay/manifest.json'); m=json.loads(p.read_text()); assert m['verdict']=='pass' and not m['outputs_truncated']"

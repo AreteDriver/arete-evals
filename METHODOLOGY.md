@@ -1,184 +1,158 @@
-# METHODOLOGY
+# Evaluation methodology
 
-**Version:** 0.1  
-**Date:** 2026-07-05  
-**Scope:** How `arete-evals` designs, runs, and calibrates LLM evaluation suites.
+**Version:** 1.0
+**Scope:** Design, execution, calibration, retention, and publication rules for
+`arete-evals` suites.
 
----
+## 1. Evidence boundary
 
-## 1. Eval Engineering vs Eval Practice
+An engine with passing self-tests proves engine behavior. A suite replaying
+known-good and known-bad fixtures proves metric behavior on those fixtures. A
+run against a documented public-project revision proves only what that run,
+dataset, target, and configuration observed.
 
-A harness with passing self-tests has caught nothing. This distinction is the foundation of the methodology.
+The repository does not use “production” as a synonym for “real.” Claims name
+the exact public project, revision, model, prompt, dataset, and run artifact.
 
-- **Eval engineering** = building the framework: metric classes, scoring math, CLI, structural gates. This is the easy part.
-- **Eval practice** = running it against messy production output and acting on the verdict. This is where false confidence lives.
+## 2. Suite lifecycle
 
-The gap between them is API-boundary hygiene (dead keys, missing transitive deps, stale environment configs) and interpretive discipline (knowing when the eval is wrong, not just when the product is wrong).
+Each suite moves through four evidence states:
 
-**Rule:** Every suite must have at least one live run record in `results/` before it is considered proven. Self-tests green is necessary, not sufficient.
+1. **Designed:** cases, expected outcomes, graders, and thresholds exist.
+2. **Replay-validated:** known-good controls pass and seeded defects fail.
+3. **Target-validated:** the frozen suite has run against a named target with
+   complete provenance.
+4. **Calibrated:** human review measures grader agreement on a held-out sample.
 
----
+Only states 2–4 are runnable evidence. State 4 is required before an LLM judge
+can become a release-blocking metric.
 
-## 2. Suite Design Principles
+## 3. Case and dataset rules
 
-### 2.1 Domain-neutral lead suites
-The public face of a suite must be domain-neutral. `benchgoblins-ask` tests JSON-leak integrity, not fantasy sports. The sport is the fixture; the eval tests a generic failure mode (raw data shape leaking into a structured response field).
+- Cases have stable IDs and live under a versioned dataset directory.
+- `input` describes what the adapter sends to the target.
+- `expected` contains machine-enforced outcome constraints.
+- Case changes require a dataset-version change unless they are formatting
+  only; content hashes independently detect silent edits.
+- Calibration cases and holdout cases remain separate. Do not tune a grader on
+  its holdout failures and report the same holdout as independent evidence.
+- Each important failure mode needs at least one known-bad fixture and one
+  nearby known-good control.
 
-### 2.2 Structural gates first, rubric second, judge last
-Three layers of defense, ordered by objectivity:
+## 4. Grading order
 
-1. **Structural gates** — regex, schema, presence/absence. Zero LLM involvement. Fast, cheap, deterministic. `fail_fast` gates force FAIL regardless of composite score.
-2. **Rubric metrics** — scored against a rubric (e.g., `personal-quality`, `code-edit`). Uses an LLM judge but with constrained scoring dimensions.
-3. **Judge metrics** — open-ended LLM evaluation with full reasoning. Most expensive, most subjective, used only when the first two layers are insufficient.
+Use the least subjective valid measure:
 
-### 2.3 `fail_fast` discipline
-Any structural gate that detects a known-bad shape must force immediate failure. Do not let composite scoring dilute a clear structural violation.
+1. Parsed schema and type checks.
+2. Deterministic case-specific invariants.
+3. Aggregate classification or regression metrics.
+4. Calibrated rubric graders.
+5. Open-ended judges only for exploratory analysis.
 
----
+Fail-fast checks are appropriate for unambiguous contract violations. They
+must have adversarial tests proving both detection and non-detection behavior.
 
-## 3. Metric Taxonomy
+The v1 structured-response grader operates on a decoded object. Regex is used
+only to identify a key/value shape inside the already-decoded rationale; it is
+not used to parse JSON.
 
-The engine supports three metric classes, each with different cost/reliability tradeoffs:
+## 5. Replay and live execution
 
-| Class | Example | Cost | Subjectivity | Use When |
-|-------|---------|------|--------------|----------|
-| Structural | `regex_absence`, schema validation | Low | None | Known-bad shapes, contract violations |
-| Rubric | `personal-quality` (6 dims) | Medium | Low-Medium | Scored comparison across runs |
-| Judge | Open-ended reasoning evaluation | High | Medium-High | Novel failure modes, exploratory |
+Replay and live modes use the same cases and graders.
 
-### 3.1 Failure Taxonomies
-Every run is tagged with two orthogonal classifiers:
+- **Replay:** deterministic CI path; no credentials, network, or model calls.
+- **Live:** adapter invokes a named public-project target. A target revision and
+  exact model identifiers are mandatory.
 
-**Technical failure modes** (`failure_taxonomy.py`):
-- `schema_drift` — output structure changed
-- `hallucination` — factually incorrect content
-- `wrong_answer` — correct format, incorrect substance
-- `refused` — model declined to answer
-- `over_budget` — cost exceeded threshold
-- `timeout` — latency violation
-- `contract_violation` — API promise broken
-- `judge_disagreement` — two judges returned different verdicts
-- `flaky` — non-deterministic failure
-- `provider_error` — upstream API failure
+A controlled treatment comparison may use the same target revision for both
+arms. In that design the differing analysis mode, model, and prompt identifiers
+must remain explicit in the variant metadata; a shared revision must not be
+presented as a code-change comparison.
 
-**Content failure modes** (`failure_taxonomy_content.py`):
-- `F1_missing_constraint` — requirement ignored
-- `F2_wrong_assumption` — invalid premise baked in
-- `F3_weak_evidence` — unsupported claim
-- `F4_too_generic` — boilerplate, no specific insight
-- `F5_overlong` — exceeded output budget
-- `F6_poor_structure` — hard to parse or act on
-- `F7_false_precision` — confidence not justified
-- `F8_insufficient_adversarial_review` — obvious objections missed
+Model-generated outputs are stochastic. A live comparison sets sample count,
+ordering, timeout, retry policy, and maximum spend before execution. Treatment
+order is randomized per case when order could bias the result.
 
-A single output can carry one technical mode and multiple content modes.
+## 6. Run-record contract
 
----
+Every canonical private bundle retains:
 
-## 4. Bootstrap A/B Comparison
+- full, untruncated model output;
+- per-case and aggregate scores;
+- suite and dataset versions plus content hashes;
+- exact engine version;
+- target revision;
+- exact model and prompt identifiers;
+- treatment metadata and SHA-256 fingerprint;
+- latency, tokens, cost, retries, and errors when available;
+- artifact sizes and SHA-256 checksums.
 
-### 4.1 When to use
-Compare two eval runs (e.g., before/after a code change, or model A vs model B) when:
-- Both runs use the **same suite** and **same metric set**
-- The difference is the **system under test**, not the eval itself
+The bundle directory is non-overwritable. Corrections produce a new bundle and
+link back to the superseded record; they do not mutate historical evidence.
 
-### 4.2 Procedure
-1. Run suite against baseline → `results/baseline-{hash}.json`
-2. Run suite against candidate → `results/candidate-{hash}.json`
-3. Compute per-case score deltas
-4. Bootstrap 10,000 resamples with replacement from the delta distribution
-5. Report 95% CI on the mean delta
-6. Verdict:
-   - CI entirely above 0 → candidate is better (statistically significant)
-   - CI entirely below 0 → candidate is worse
-   - CI spans 0 → inconclusive; need more cases or a sharper metric
+## 7. Metric validation
 
-### 4.3 Interpreting inconclusive results
-An inconclusive result is not a null result. It means the signal is smaller than the noise floor of the current suite. Options:
-- Add more cases (increase n)
-- Sharpen the metric (reduce variance)
-- Accept that the change has no practical effect
+Metric quality is reported separately from target quality.
 
----
+- **False positive:** known-good output fails.
+- **False negative:** seeded known-bad output passes.
+- **Target failure:** target output violates a validated metric.
+- **Infrastructure error:** the adapter, provider, or environment fails before
+  a valid output can be graded.
 
-## 5. Run Record Philosophy
+“No false negatives” may be claimed only for an identified labeled fixture set
+that contains known-bad examples. It is never inferred from a set containing
+only passing outputs.
 
-Every run produces a machine-readable record in `results/` containing:
-- Full model output (for reproducibility)
-- Per-case metric scores
-- Aggregate statistics
-- Timestamp, suite version, model identifier
+## 8. Comparison and uncertainty
 
-**Why keep full outputs:** Evals are wrong too. The only way to diagnose "the eval failed" vs "the product failed" is to re-read the raw output.
+Baseline and candidate comparisons are paired by case and sample. Reports show
+raw per-case outcomes, effect size, variance, and uncertainty—not only a mean
+score.
 
-**Retention policy:** Indefinite. Storage is cheap; regret is expensive. Records are named `{suite}-{hash}.json` where `hash` is a truncated SHA of the suite file + model identifier.
+For stochastic or judge-scored suites:
 
----
+- use repeated samples;
+- pre-register a minimum meaningful improvement;
+- report paired confidence intervals;
+- account for correlated cases through slicing or clustered resampling;
+- treat an interval spanning zero as inconclusive.
 
-## 6. Calibration Process
+The 10-case v1 replay is a deterministic regression test and does not claim
+population-level statistical significance.
 
-### 6.1 Weekly cadence
-Every Tuesday (or the first working day after):
-1. Run the full battery against current production output
-2. Spot-check 5% of cases manually
-3. Flag cases where human judgment disagrees with eval verdict
-4. If disagreement rate > 10%, freeze the suite for repair
-5. Log calibration results in `results/calibration-YYYY-MM-DD.json`
+## 9. Judge calibration
 
-### 6.2 Suite repair protocol
-When a suite is frozen:
-1. Diagnose: is the suite too strict, or did the product regress?
-2. If suite is too strict: relax gates, add tolerance, or split into versioned suites
-3. If product regressed: file a `setup-blocker` issue, do not relax the gate
-4. Re-run calibration until human agreement returns to > 90%
+An LLM judge remains advisory until:
 
-### 6.3 Rubric drift
-Rubrics degrade over time as model capabilities shift. A rubric calibrated on Claude 3.5 may under-score Claude 4.6 on dimensions that are now table stakes. Review rubrics quarterly.
+1. the rubric and judge prompt are versioned;
+2. outputs are blind-rated by humans;
+3. judge/human agreement, error, and disagreement slices are reported;
+4. acceptance thresholds are fixed before the target comparison.
 
----
+Judge model, temperature, reasoning configuration, and replayed judgments are
+part of provenance.
 
-## 7. Case Study: benchgoblins-ask
+## 10. Privacy and publication
 
-**Purpose:** Guard against JSON-leak regression in a structured LLM output pipeline.
+Full outputs are private by default. Public artifacts are derived through an
+explicit command requiring reviewer attribution.
 
-**Setup:**
-- 20 cases covering waiver, trade, and start/sit scenarios
-- Six `fail_fast` structural gates using `regex_absence`
-- Gate pattern: detect raw JSON shape (`"recommendations"`, `"drop_candidates"`) inside the `rationale` field
+- Default public export contains response hashes and sizes, not response text.
+- Full output requires the `--include-outputs` flag after manual review.
+- Credentials are read only from named environment variables and are never
+  serialized.
+- Public artifacts must not contain secrets, private user data, employer data,
+  or machine-specific paths.
+- Retention is not automatically indefinite: private records follow the data
+  owner’s policy; public records are retained only while their evidence value
+  and publication basis remain valid.
 
-**Live run result:** 15/20 passed. 5 failures, all `waiver_*` cases, all tripping `regex_absence` at 0%.
+## 11. Historical BenchGoblins artifact
 
-**First read:** The eval caught a live regression. Half the waiver path still leaking.
+The 2026-05-22 run remains evidence of a metric false-positive investigation.
+Its outputs are 500-character prefixes and its model/suite provenance is
+incomplete. It is therefore historical evidence, not a canonical v1 run.
 
-**Actual diagnosis:** The gate was too brittle. Model output contained the word "recommendations" in natural language ("I need more context to give you specific waiver recommendations..."), not as JSON keys. The gate fired on substring match, not structural match.
-
-**Lesson:** A structural gate that matches natural language is a false positive factory. The fix: anchor the regex to JSON shape (`"rationale": "..."recommendations` with key-value context), not bareword presence.
-
-**Why this matters:** Without the live run, the suite would have sat at "391 passing tests, zero catches" — falsely reassuring. The eval was wrong. The practice caught it.
-
----
-
-## 8. Known Limitations
-
-1. **Judge subjectivity:** Rubric metrics depend on LLM judge temperature and prompt version. Results are reproducible only with pinned judge configurations.
-2. **Structural gate brittleness:** Regex gates fail when output format changes innocently. Version suites alongside product versions.
-3. **Bootstrap assumptions:** The 95% CI assumes independent cases. Correlated cases (e.g., all hitting the same API endpoint) inflate confidence.
-4. **Calibration cost:** Weekly manual spot-checking is expensive. The harvester mechanism (v0.1+) aims to auto-generate candidate cases from transcripts, but human sign-off remains required.
-
----
-
-## 9. References
-
-- **Suites:** `suites/` directory
-- **Run records:** `results/` directory
-- **Triage UI:** Open `tools/triage.html` in a browser, import any `results/*.json`
-- **Engine:** `pip install -e ../evalcore` (see `requirements.txt`)
-- **Case study full record:** `results/benchgoblins-ask-6ea664d3.json`
-
----
-
-## 10. Changelog
-
-| Date | Change |
-|------|--------|
-| 2026-07-05 | v0.1 — Initial methodology document. Covers engineering vs practice distinction, metric taxonomy, bootstrap A/B, calibration protocol, and benchgoblins-ask case study. |
+The current adversarial replay independently covers the failure family with
+known-bad JSON leaks and known-good ordinary uses of “recommendations.”

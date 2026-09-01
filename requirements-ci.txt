@@ -1,2 +1,9 @@
-PyYAML==6.0.3 \
-    --hash=sha256:ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc
+annotated-types==0.8.0
+evalcore==0.2.0
+pydantic==2.13.5
+pydantic-core==2.46.5
+PyYAML==6.0.3
+ruff==0.15.11
+setuptools==84.0.0
+typing-extensions==4.16.0
+typing-inspection==0.4.4

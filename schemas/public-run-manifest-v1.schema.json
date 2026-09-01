@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aretedriver.dev/schemas/arete-evals/public-run-manifest-v1.schema.json",
+  "title": "Arete Evals Public Run Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "bundle_id", "published_at", "reviewed_by",
+    "output_policy", "source_manifest_sha256", "suite", "suite_hash",
+    "dataset_version", "dataset_hash", "engine", "mode", "verdict",
+    "treatments", "artifacts"
+  ],
+  "properties": {
+    "schema_version": {"const": "public-run-manifest-v1"},
+    "bundle_id": {"type": "string", "minLength": 1},
+    "published_at": {"type": "string", "format": "date-time"},
+    "reviewed_by": {"type": "string", "minLength": 1},
+    "output_policy": {"enum": ["hashes-only", "reviewed-full-output"]},
+    "source_manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "suite": {"type": "string"},
+    "suite_hash": {"type": "string"},
+    "dataset_version": {"type": "string"},
+    "dataset_hash": {"type": "string"},
+    "engine": {"type": "object"},
+    "mode": {"enum": ["replay", "http"]},
+    "revision": {"type": ["string", "null"]},
+    "verdict": {"enum": ["pass", "warn", "fail"]},
+    "treatments": {"type": "object"},
+    "artifacts": {"type": "object"}
+  }
+}

@@ -1,0 +1,98 @@
+basic-recommendation:
+  baseline:
+    response:
+      decision: Recommend A
+      rationale: '{"recommendations": [{"item": "A"}], "summary": "Choose A"}'
+  candidate:
+    response:
+      decision: Recommend A
+      rationale: Option A best satisfies the stated constraints with the lowest implementation risk.
+multiple-recommendations:
+  baseline:
+    response:
+      decision: Recommend A
+      rationale: The three options are presented in ranked order for review.
+      details:
+        recommendations: [A, B]
+  candidate:
+    response:
+      decision: Recommend A
+      rationale: The three options are ranked by expected value, risk, and reversibility.
+      details:
+        recommendations: [A, B, C]
+drop-candidates:
+  baseline:
+    response:
+      decision: Remove C
+      rationale: Candidate C contributes the least value under the stated constraints.
+  candidate:
+    response:
+      decision: Remove C
+      rationale: Candidate C contributes the least value under the stated constraints.
+      details:
+        drop_candidates: [C]
+plain-word-recommendations:
+  baseline:
+    response:
+      decision: Review recommendations
+      rationale: These recommendations are intentionally described in ordinary prose, not embedded JSON.
+  candidate:
+    response:
+      decision: Review recommendations
+      rationale: These recommendations are intentionally described in ordinary prose, not embedded JSON.
+quoted-prose:
+  baseline:
+    response:
+      decision: Keep the current option
+      rationale: 'The phrase "best available option" is quoted prose and remains a normal string.'
+  candidate:
+    response:
+      decision: Keep the current option
+      rationale: 'The phrase "best available option" is quoted prose and remains a normal string.'
+unicode-rationale:
+  baseline:
+    response:
+      decision: Proceed
+      rationale: "La décision est réversible — 変更後も安全に元へ戻せます。"
+  candidate:
+    response:
+      decision: Proceed
+      rationale: "La décision est réversible — 変更後も安全に元へ戻せます。"
+whitespace-leak:
+  baseline:
+    response:
+      decision: Recommend A
+      rationale: '   {"recommendations": ["A"], "summary": "Choose A"}'
+  candidate:
+    response:
+      decision: Recommend A
+      rationale: Option A is preferred because it preserves the most flexibility for later changes.
+escaped-key-leak:
+  baseline:
+    response:
+      decision: Recommend A
+      rationale: 'A prefix {"drop_candidates": ["C"]} was incorrectly serialized into this field.'
+  candidate:
+    response:
+      decision: Recommend A
+      rationale: Candidate C is listed separately in details instead of being serialized into prose.
+      details:
+        drop_candidates: [C]
+fallback-decision:
+  baseline:
+    response:
+      decision: Unable to determine
+      rationale: The response contains enough explanation but avoids making the required decision.
+  candidate:
+    response:
+      decision: Recommend B
+      rationale: Option B is the strongest available choice under the supplied constraints.
+decision-pattern:
+  baseline:
+    response:
+      decision: Consider the proposal
+      rationale: The proposal is plausible, but this response does not make the requested determination.
+  candidate:
+    response:
+      decision: Accept the proposal
+      rationale: The expected benefit exceeds the bounded downside and the action remains reversible.

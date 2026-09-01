@@ -1,0 +1,16 @@
+id: deadweight-acknowledgment
+labels: {slice: deadweight, source: curated}
+input:
+  extension: .md
+  content: |
+    ## User
+    Prepare a migration plan for the database.
+
+    ## Assistant
+    Okay, thanks, got it.
+
+    ## User
+    Include rollback steps and a verification checklist.
+expected:
+  total_segments: 3
+  required_deadweight_indices: [1]

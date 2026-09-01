@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools==84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arete-evals-suite"
+version = "0.1.0"
+description = "Versioned evaluation suites, adapters, graders, and reproducible run artifacts"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+  "evalcore==0.2.0",
+  "PyYAML==6.0.3",
+]
+
+[project.scripts]
+arete-evals = "arete_evals.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["arete_evals*"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

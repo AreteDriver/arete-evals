@@ -1,34 +1,55 @@
-# Project Status
+# Project status
 
-| Attribute | Value |
-|-----------|-------|
-| Status | **PARTIAL — public evaluation evidence repository** |
+| Attribute | Current state |
+|---|---|
+| Status | **RUNNABLE OFFLINE; LIVE EVIDENCE PENDING** |
 | Last verified | 2026-08-31 |
-| Installable? | Supporting requirements only; the evaluation engine is not included |
-| Re-runnable? | Not end-to-end from this repository alone |
-| Documented? | README, methodology, suites, run record, and triage record |
+| Suite package | `arete-evals-suite==0.1.0` |
+| Engine | External `evalcore==0.2.0`, exact-pinned |
+| Canonical suites | `structured-response-integrity@v1`; `deep-analysis-finding-recall@v1` |
+| Versioned cases | 14 |
+| Automated tests | 23 |
+| Canonical replay | Both suites pass their frozen replay comparisons |
+| Public-project target | `AreteDriver/context-hygiene` selected and fast arm smoke-tested |
+| Live public-project run | Full fast/deep comparison not yet executed |
 
-## What works
+## Working now
 
-- A public suite definition for the documented BenchGoblins Ask evaluation.
-- A retained JSON run record and human-readable triage record.
-- A browser-based triage helper for inspecting run records.
-- A methodology that separates evaluation-framework construction from evaluation practice.
+- Clean-checkout installation through `pip install -e .`.
+- Complete replay coverage for baseline and candidate variants.
+- Parsed structured-response grading with case-specific expected outcomes.
+- Adversarial fixtures covering the historical leak and false-positive shape.
+- Live HTTP adapter with environment-only credentials, bounded timeouts, and
+  retry classification.
+- Isolated `context-hygiene` CLI adapter with frozen fast/deep treatments,
+  provider token/retry limits, and structured finding-recall grading.
+- Immutable private bundles with full outputs, suite/dataset hashes, exact
+  engine version, treatment fingerprints, and artifact checksums.
+- Human-attributed public export that defaults to hashes instead of output.
+- CI validation, tests, replay execution, and bundle assertions.
 
-## What does not work yet
+## Honest limitations
 
-- The referenced evaluation harness is not packaged in this repository.
-- There is no automated CI that reruns suites against live public projects.
-- There is no hosted trend dashboard.
-- The recorded result demonstrates one documented run; it is not a general performance claim.
+- No canonical fast/deep bundle has been produced with model credentials yet.
+- The public target does not calculate currency cost; the live protocol uses
+  token/request bounds plus a provider-side budget ceiling.
+- No calibrated LLM judge is enabled; v1 uses deterministic graders only.
+- The replay datasets are focused 10-case and 4-case regression suites, not a
+  broad model benchmark.
+- The committed public replay is based on curated adversarial fixtures, not
+  production traffic.
+- The historical BenchGoblins record contains truncated output prefixes and
+  incomplete provenance. It is excluded from canonical v1 claims.
 
-## 60-second inspection
+## Definition of v1 complete
 
-1. Read `results/benchgoblins-ask-6ea664d3.triage.md`.
-2. Inspect `results/benchgoblins-ask-6ea664d3.json`.
-3. Compare the evidence with `suites/benchgoblins-ask.yaml`.
-4. Review `METHODOLOGY.md`.
+V1 becomes complete when the committed `context-hygiene` suite is run against
+one exact public target revision with its frozen fast and deep treatments,
+complete private outputs, a reviewed public derivative, an approved spend
+ceiling, and a second-person blinded review of a sample.
 
 ## Scope
 
-This is independent public project work. It demonstrates evaluation practice and evidence discipline; it is not presented as employer production ownership, an industry benchmark, or a standalone evaluation platform.
+This is independent public project work. It demonstrates evaluation practice
+and evidence discipline; it is not presented as employer production ownership,
+an industry benchmark, or a standalone evaluation platform.

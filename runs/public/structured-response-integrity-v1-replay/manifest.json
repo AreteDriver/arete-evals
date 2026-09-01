@@ -1,0 +1,55 @@
+{
+  "artifacts": {
+    "comparison.json": {
+      "bytes": 1233,
+      "sha256": "dba2ae5204eaa1190fa9bb88a060fe8611a5f2a67167be0b54ec699a1f802127"
+    },
+    "outputs.jsonl": {
+      "bytes": 3686,
+      "sha256": "c073a1a7117ed15632dafae3ee984a1a57dfaba2de2cad4b1f3e0708c4e81f62"
+    },
+    "report.md": {
+      "bytes": 1265,
+      "sha256": "0f5173082b8ad22a91d9af5bc34a051529076b6b8cbbcc30a7a9e0a9c57cb6c3"
+    },
+    "scores.jsonl": {
+      "bytes": 29450,
+      "sha256": "27157ac3e71211617a7466e4a38feb9b437121921e2c6a0d73bedda70a60a7e0"
+    }
+  },
+  "bundle_id": "structured-response-integrity-v1-replay",
+  "dataset_hash": "126f88ad761d",
+  "dataset_version": "v1",
+  "engine": {
+    "name": "evalcore",
+    "version": "0.2.0"
+  },
+  "mode": "replay",
+  "output_policy": "hashes-only",
+  "published_at": "2026-08-31T20:05:00+00:00",
+  "reviewed_by": "principal-ai-engineer-review",
+  "revision": null,
+  "schema_version": "public-run-manifest-v1",
+  "source_manifest_sha256": "e07e5134adeb7784f323edadd90a9fb67490bdf25e3e72998cbf5884fab3cc43",
+  "suite": "structured-response-integrity",
+  "suite_hash": "9a98353de516",
+  "treatments": {
+    "baseline": {
+      "config": {},
+      "fingerprint": "8458b3a532a18c11bec22c6ead757912d44a83c6f893c8fcebd28860a4d4e91a",
+      "id": "baseline",
+      "kind": "baseline",
+      "version": "1"
+    },
+    "candidate": {
+      "config": {
+        "response_contract": "decision-rationale-details-v1"
+      },
+      "fingerprint": "adc44ca384e18dd9e9faa2549e919cce3e62b99e3b2dfd2e3f622b3efb6148f0",
+      "id": "structured-output-fix",
+      "kind": "instructions",
+      "version": "1"
+    }
+  },
+  "verdict": "pass"
+}

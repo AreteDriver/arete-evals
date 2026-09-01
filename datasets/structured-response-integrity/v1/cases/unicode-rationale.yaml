@@ -1,0 +1,6 @@
+id: unicode-rationale
+labels: {slice: unicode, validity: expected-valid}
+input:
+  query: Explain the decision using multilingual text.
+expected:
+  rationale_min_chars: 20

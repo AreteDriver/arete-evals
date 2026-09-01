@@ -1,0 +1,6 @@
+id: escaped-key-leak
+labels: {slice: adversarial-escaping, validity: expected-valid}
+input:
+  query: Return a structured answer without escaped JSON keys in rationale.
+expected:
+  rationale_min_chars: 20
