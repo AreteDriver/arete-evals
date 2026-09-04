@@ -38,21 +38,21 @@ class SuiteIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(comparison.verdict, "pass")
 
-    def test_context_hygiene_replay_exercises_finding_recall(self) -> None:
+    def test_context_hygiene_replay_exercises_finding_quality(self) -> None:
         summary = validate_suite(CONTEXT_HYGIENE_SUITE)
-        self.assertEqual(summary["cases"], 4)
+        self.assertEqual(summary["cases"], 8)
         suite = evalcore.load_suite(CONTEXT_HYGIENE_SUITE)
         baseline = evalcore.run_suite_sync(suite, "baseline", mode="replay")
         candidate = evalcore.run_suite_sync(suite, "candidate", mode="replay")
         comparison = evalcore.compare.compare(
             baseline.scorecard, candidate.scorecard, suite.thresholds
         )
-        self.assertEqual(
-            baseline.scorecard.metrics["expected_findings_recalled"].value, 0.5
-        )
-        self.assertEqual(
-            candidate.scorecard.metrics["expected_findings_recalled"].value, 1.0
-        )
+        self.assertEqual(baseline.scorecard.metrics["finding_precision"].value, 0.375)
+        self.assertEqual(baseline.scorecard.metrics["finding_recall"].value, 0.75)
+        self.assertEqual(baseline.scorecard.metrics["finding_f1"].value, 0.25)
+        self.assertEqual(candidate.scorecard.metrics["finding_precision"].value, 1.0)
+        self.assertEqual(candidate.scorecard.metrics["finding_recall"].value, 1.0)
+        self.assertEqual(candidate.scorecard.metrics["finding_f1"].value, 1.0)
         self.assertEqual(comparison.verdict, "pass")
 
     def test_bundle_is_complete_checksummed_and_immutable(self) -> None:

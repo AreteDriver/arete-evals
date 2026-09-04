@@ -1,0 +1,20 @@
+id: clean-consistent-context
+labels: {slice: clean, source: curated, polarity: negative}
+input:
+  extension: .md
+  content: |
+    ## System
+    Return the final result as JSON.
+
+    ## User
+    Analyze the request and return the result as JSON.
+
+    ## Assistant
+    I will return a JSON object with the requested analysis.
+expected:
+  total_segments: 3
+  minimum_staleness_score: 0.5
+  stale_indices: []
+  contradiction_pairs: []
+  deadweight_indices: []
+  compression_groups: []

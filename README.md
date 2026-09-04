@@ -126,13 +126,15 @@ Case-specific requirements such as recommendation counts and decision patterns
 come from each versioned case's `expected` object.
 
 The second canonical suite,
-[`deep-analysis-finding-recall@v1`](suites/context-hygiene-deep-analysis.yaml),
+[`deep-analysis-finding-quality@v2`](suites/context-hygiene-deep-analysis.yaml),
 targets the public
 [`AreteDriver/context-hygiene`](https://github.com/AreteDriver/context-hygiene)
 project. It compares that project's deterministic fast analysis with its
-Anthropic-backed deep analysis on four frozen staleness, contradiction,
-deadweight, and compression cases. Both arms use the same target revision;
-the treatment under test is analysis mode, not a code revision.
+Anthropic-backed deep analysis on eight frozen staleness, contradiction,
+deadweight, and compression cases. Four positive cases require exact findings;
+four clean and adversarial near-misses penalize over-reporting. The grader emits
+per-category and aggregate precision, recall, and F1. Both arms use the same
+target revision; the treatment under test is analysis mode, not a code revision.
 
 ## Live target contract
 
@@ -185,8 +187,8 @@ arete-evals run \
 The adapter writes each case and non-secret provider configuration to an
 isolated temporary directory. The frozen candidate configuration allows zero
 provider retries and at most 1,024 output tokens per request. Four analyzer
-passes × four cases × three samples bounds the candidate arm at 48 provider
-requests and 49,152 output tokens, before input tokens. Use a provider-side
+passes × eight cases × three samples bounds the candidate arm at 96 provider
+requests and 98,304 output tokens, before input tokens. Use a provider-side
 budget limit because the repository does not compute currency cost.
 
 ## Evidence and publication

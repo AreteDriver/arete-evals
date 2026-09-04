@@ -1,0 +1,17 @@
+id: compatible-format-requirements
+labels: {slice: contradiction-near-miss, source: curated, polarity: negative}
+input:
+  extension: .md
+  content: |
+    ## System
+    Return a valid JSON object.
+
+    ## User
+    Include a summary field in the JSON object.
+expected:
+  total_segments: 2
+  minimum_staleness_score: 0.5
+  stale_indices: []
+  contradiction_pairs: []
+  deadweight_indices: []
+  compression_groups: []

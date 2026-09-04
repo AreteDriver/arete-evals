@@ -1,0 +1,20 @@
+id: deadweight-acknowledgment
+labels: {slice: deadweight, source: curated, polarity: positive}
+input:
+  extension: .md
+  content: |
+    ## User
+    Prepare a migration plan for the database.
+
+    ## Assistant
+    Okay, thanks, got it.
+
+    ## User
+    Include rollback steps and a verification checklist.
+expected:
+  total_segments: 3
+  minimum_staleness_score: 0.5
+  stale_indices: []
+  contradiction_pairs: []
+  deadweight_indices: [1]
+  compression_groups: []

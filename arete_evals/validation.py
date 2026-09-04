@@ -19,6 +19,12 @@ TREATMENT_KINDS = {
     "subagent",
     "runtime",
 }
+EXACT_FINDING_FIELDS = {
+    "stale_indices",
+    "contradiction_pairs",
+    "deadweight_indices",
+    "compression_groups",
+}
 
 
 def canonical_sha256(value: Any) -> str:
@@ -43,12 +49,86 @@ def validate_treatment(value: Any, *, source: str) -> dict[str, Any]:
     return value
 
 
+def _validate_index_list(value: Any, *, total: int, source: str) -> None:
+    if (
+        not isinstance(value, list)
+        or any(not isinstance(index, int) for index in value)
+        or len(set(value)) != len(value)
+        or any(index < 0 or index >= total for index in value)
+    ):
+        raise ValueError(f"{source}: expected unique in-bounds segment indices")
+
+
+def _validate_exact_findings(
+    expected: Any, *, source: str, required: bool = False
+) -> None:
+    if not isinstance(expected, dict):
+        raise ValueError(f"{source}: expected must be an object")
+    present = EXACT_FINDING_FIELDS & set(expected)
+    if not present:
+        if required:
+            raise ValueError(f"{source}: exact finding contract is required")
+        return
+    missing = sorted(EXACT_FINDING_FIELDS - set(expected))
+    if missing:
+        raise ValueError(
+            f"{source}: exact finding contract missing {', '.join(missing)}"
+        )
+    total = expected.get("total_segments")
+    if not isinstance(total, int) or total < 0:
+        raise ValueError(f"{source}: total_segments must be a non-negative integer")
+    threshold = expected.get("minimum_staleness_score", 0.5)
+    if not isinstance(threshold, int | float) or not 0 <= threshold <= 1:
+        raise ValueError(f"{source}: minimum_staleness_score must be between 0 and 1")
+    _validate_index_list(
+        expected["stale_indices"], total=total, source=f"{source}:stale_indices"
+    )
+    _validate_index_list(
+        expected["deadweight_indices"],
+        total=total,
+        source=f"{source}:deadweight_indices",
+    )
+    pairs = expected["contradiction_pairs"]
+    if not isinstance(pairs, list):
+        raise ValueError(f"{source}:contradiction_pairs must be a list")
+    normalized_pairs: set[tuple[int, int]] = set()
+    for pair in pairs:
+        if not isinstance(pair, list) or len(pair) != 2 or pair[0] == pair[1]:
+            raise ValueError(
+                f"{source}: contradiction pairs require two distinct indices"
+            )
+        _validate_index_list(pair, total=total, source=f"{source}:contradiction_pairs")
+        normalized_pairs.add(tuple(sorted(pair)))
+    if len(normalized_pairs) != len(pairs):
+        raise ValueError(f"{source}: contradiction pairs must be unique")
+    groups = expected["compression_groups"]
+    if not isinstance(groups, list):
+        raise ValueError(f"{source}:compression_groups must be a list")
+    normalized_groups: set[tuple[int, ...]] = set()
+    for group in groups:
+        if not isinstance(group, list) or len(group) < 2:
+            raise ValueError(
+                f"{source}: compression groups require at least two indices"
+            )
+        _validate_index_list(group, total=total, source=f"{source}:compression_groups")
+        normalized_groups.add(tuple(sorted(group)))
+    if len(normalized_groups) != len(groups):
+        raise ValueError(f"{source}: compression groups must be unique")
+
+
 def validate_suite(path: Path) -> dict[str, Any]:
     suite = evalcore.load_suite(path)
     cases = evalcore.load_cases(suite.dataset)
     case_ids = [case.id for case in cases]
     if len(case_ids) != len(set(case_ids)):
         raise ValueError(f"{path}: duplicate case IDs")
+    exact_findings_required = suite.suite == "deep-analysis-finding-quality"
+    for case in cases:
+        _validate_exact_findings(
+            case.expected,
+            source=f"{suite.dataset}:{case.id}",
+            required=exact_findings_required,
+        )
 
     variants = set(suite.variants)
     for name, knobs in suite.variants.items():

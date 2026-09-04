@@ -12,6 +12,8 @@ is outside the v1 finish line.
 - [x] Add replay and live target adapter boundaries.
 - [x] Replace serialized-output regexes with parsed-object contract grading.
 - [x] Add known-good and known-bad fixtures, including false-positive controls.
+- [x] Add exact finding contracts, negative controls, and precision/recall/F1
+  grading for the context-hygiene v2 dataset.
 - [x] Add suite, treatment, private-manifest, and public-manifest validation.
 - [x] Add immutable evidence bundles with complete outputs and checksums.
 - [x] Add review-gated public export and harden triage rendering.
@@ -26,7 +28,7 @@ both intentionally run the same target revision.
 
 1. Commit the target-side usage/limit metadata, pin that exact revision, and
    approve the provider-side maximum spend.
-2. Freeze the v1 cases and holdout before looking at the candidate results.
+2. Freeze the v2 cases and holdout before looking at the candidate results.
 3. Run baseline and candidate with repeated samples appropriate to model
    variance and retain the complete private bundle.
 4. Recompute aggregate metrics from per-case scores and inspect every failure.

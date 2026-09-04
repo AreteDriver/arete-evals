@@ -136,6 +136,97 @@ class ContextHygieneReportGraderTests(unittest.TestCase):
         )
         self.assertTrue(scores["contract_pass"].passed)
 
+    def test_exact_contract_penalizes_over_reporting(self) -> None:
+        report = {
+            "total_segments": 3,
+            "grade": "C",
+            "mode": "deep",
+            "staleness_results": [
+                {"segment_index": 0, "score": 0.8, "reasons": ["superseded"]}
+            ],
+            "contradictions": [],
+            "deadweight": [{"segment_index": 1, "reason": "short"}],
+            "compression_candidates": [],
+        }
+        scores = self.grade(
+            report,
+            {
+                "total_segments": 3,
+                "stale_indices": [0],
+                "contradiction_pairs": [],
+                "deadweight_indices": [],
+                "compression_groups": [],
+            },
+        )
+        self.assertEqual(scores["finding_precision"].value, 0.5)
+        self.assertEqual(scores["finding_recall"].value, 1.0)
+        self.assertAlmostEqual(scores["finding_f1"].value, 2 / 3)
+        self.assertFalse(scores["contract_pass"].passed)
+
+    def test_exact_contract_penalizes_missing_findings(self) -> None:
+        report = {
+            "total_segments": 2,
+            "grade": "A",
+            "mode": "deep",
+            "staleness_results": [],
+            "contradictions": [],
+            "deadweight": [],
+            "compression_candidates": [],
+        }
+        scores = self.grade(
+            report,
+            {
+                "total_segments": 2,
+                "stale_indices": [],
+                "contradiction_pairs": [[0, 1]],
+                "deadweight_indices": [],
+                "compression_groups": [],
+            },
+        )
+        self.assertEqual(scores["finding_precision"].value, 1.0)
+        self.assertEqual(scores["finding_recall"].value, 0.0)
+        self.assertEqual(scores["finding_f1"].value, 0.0)
+        self.assertFalse(scores["contract_pass"].passed)
+
+    def test_exact_clean_contract_scores_perfectly(self) -> None:
+        report = {
+            "total_segments": 2,
+            "grade": "A",
+            "mode": "deep",
+            "staleness_results": [],
+            "contradictions": [],
+            "deadweight": [],
+            "compression_candidates": [],
+        }
+        scores = self.grade(
+            report,
+            {
+                "total_segments": 2,
+                "stale_indices": [],
+                "contradiction_pairs": [],
+                "deadweight_indices": [],
+                "compression_groups": [],
+            },
+        )
+        self.assertEqual(scores["finding_precision"].value, 1.0)
+        self.assertEqual(scores["finding_recall"].value, 1.0)
+        self.assertEqual(scores["finding_f1"].value, 1.0)
+        self.assertTrue(scores["contract_pass"].passed)
+
+    def test_partial_exact_contract_is_rejected(self) -> None:
+        report = {
+            "total_segments": 2,
+            "grade": "A",
+            "mode": "deep",
+            "staleness_results": [],
+            "contradictions": [],
+            "deadweight": [],
+            "compression_candidates": [],
+        }
+        scores = self.grade(report, {"stale_indices": []})
+        self.assertFalse(scores["expected_findings_valid"].passed)
+        self.assertFalse(scores["contract_pass"].passed)
+
     def test_out_of_bounds_finding_fails_reference_check(self) -> None:
         report = {
             "total_segments": 2,

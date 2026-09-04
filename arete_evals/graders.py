@@ -29,6 +29,40 @@ def _score(
     )
 
 
+def _value_score(
+    *,
+    name: str,
+    metric: str,
+    case_id: str,
+    value: float,
+    passed: bool,
+    detail: str,
+) -> models.Score:
+    return models.Score(
+        grader=name,
+        metric=metric,
+        value=value,
+        passed=passed,
+        detail=detail,
+        case_id=case_id,
+    )
+
+
+def _classification_metrics(
+    expected: set[Any], predicted: set[Any]
+) -> tuple[float, float, float, int, int, int]:
+    """Return precision, recall, F1 and counts with useful empty-set semantics."""
+    true_positives = len(expected & predicted)
+    false_positives = len(predicted - expected)
+    false_negatives = len(expected - predicted)
+    precision = (
+        true_positives / (true_positives + false_positives) if predicted else 1.0
+    )
+    recall = true_positives / len(expected) if expected else 1.0
+    f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+    return precision, recall, f1, true_positives, false_positives, false_negatives
+
+
 def _decode_response(value: Any) -> tuple[dict[str, Any] | None, str | None]:
     if isinstance(value, dict):
         return value, None
@@ -204,10 +238,27 @@ def _pair_set(values: Any) -> set[tuple[int, int]] | None:
             not isinstance(pair, list)
             or len(pair) != 2
             or any(not isinstance(index, int) for index in pair)
+            or pair[0] == pair[1]
         ):
             return None
         pairs.add(tuple(sorted((pair[0], pair[1]))))
     return pairs
+
+
+def _group_set(values: Any) -> set[tuple[int, ...]] | None:
+    if not isinstance(values, list):
+        return None
+    groups: set[tuple[int, ...]] = set()
+    for group in values:
+        if (
+            not isinstance(group, list)
+            or len(group) < 2
+            or any(not isinstance(index, int) for index in group)
+            or len(set(group)) != len(group)
+        ):
+            return None
+        groups.add(tuple(sorted(group)))
+    return groups
 
 
 @base.register("context_hygiene_report")
@@ -310,7 +361,7 @@ class ContextHygieneReportGrader:
                 valid_shapes = False
                 continue
             pair = (item.get("segment_a"), item.get("segment_b"))
-            if any(not isinstance(index, int) for index in pair):
+            if any(not isinstance(index, int) for index in pair) or pair[0] == pair[1]:
                 valid_shapes = False
                 continue
             references.extend(pair)
@@ -325,7 +376,11 @@ class ContextHygieneReportGrader:
                 valid_shapes = False
                 continue
             indices = _integer_set(item.get("segment_indices"))
-            if indices is None:
+            if (
+                indices is None
+                or len(indices) < 2
+                or len(indices) != len(item["segment_indices"])
+            ):
                 valid_shapes = False
                 continue
             references.extend(indices)
@@ -367,6 +422,137 @@ class ContextHygieneReportGrader:
             and isinstance(item.get("segment_a"), int)
             and isinstance(item.get("segment_b"), int)
         }
+        compression_found = {
+            tuple(sorted(indices))
+            for item in report["compression_candidates"]
+            if isinstance(item, dict)
+            and (indices := _integer_set(item.get("segment_indices"))) is not None
+        }
+
+        exact_keys = {
+            "stale_indices",
+            "contradiction_pairs",
+            "deadweight_indices",
+            "compression_groups",
+        }
+        if exact_keys & set(expected):
+            if not exact_keys.issubset(expected):
+                missing = ", ".join(sorted(exact_keys - set(expected)))
+                checks.append(
+                    (
+                        "expected_findings_valid",
+                        False,
+                        f"exact finding contract missing: {missing}",
+                    )
+                )
+                return self._finish(case.id, checks)
+            expected_sets = {
+                "staleness": _integer_set(expected["stale_indices"]),
+                "contradiction": _pair_set(expected["contradiction_pairs"]),
+                "deadweight": _integer_set(expected["deadweight_indices"]),
+                "compression": _group_set(expected["compression_groups"]),
+            }
+            if not staleness_threshold_valid or any(
+                values is None for values in expected_sets.values()
+            ):
+                checks.append(
+                    (
+                        "expected_findings_valid",
+                        False,
+                        "exact finding contract contains invalid values",
+                    )
+                )
+                return self._finish(case.id, checks)
+
+            checks.append(("expected_findings_valid", True, "exact finding contract"))
+            predicted_sets = {
+                "staleness": stale_found,
+                "contradiction": contradictions_found,
+                "deadweight": deadweight_found,
+                "compression": compression_found,
+            }
+            metric_scores: list[models.Score] = []
+            total_tp = total_fp = total_fn = 0
+            for category, expected_values in expected_sets.items():
+                assert expected_values is not None
+                precision, recall, f1, tp, fp, fn = _classification_metrics(
+                    expected_values, predicted_sets[category]
+                )
+                total_tp += tp
+                total_fp += fp
+                total_fn += fn
+                detail = f"tp={tp} fp={fp} fn={fn}"
+                for metric, value in (
+                    (f"{category}_precision", precision),
+                    (f"{category}_recall", recall),
+                    (f"{category}_f1", f1),
+                ):
+                    metric_scores.append(
+                        _value_score(
+                            name=self.name,
+                            metric=metric,
+                            case_id=case.id,
+                            value=value,
+                            passed=value == 1.0,
+                            detail=detail,
+                        )
+                    )
+
+            aggregate_precision = (
+                total_tp / (total_tp + total_fp) if total_tp + total_fp else 1.0
+            )
+            aggregate_recall = (
+                total_tp / (total_tp + total_fn) if total_tp + total_fn else 1.0
+            )
+            aggregate_f1 = (
+                2
+                * aggregate_precision
+                * aggregate_recall
+                / (aggregate_precision + aggregate_recall)
+                if aggregate_precision + aggregate_recall
+                else 0.0
+            )
+            aggregate_detail = f"micro tp={total_tp} fp={total_fp} fn={total_fn}"
+            for metric, value in (
+                ("finding_precision", aggregate_precision),
+                ("finding_recall", aggregate_recall),
+                ("finding_f1", aggregate_f1),
+            ):
+                metric_scores.append(
+                    _value_score(
+                        name=self.name,
+                        metric=metric,
+                        case_id=case.id,
+                        value=value,
+                        passed=value == 1.0,
+                        detail=aggregate_detail,
+                    )
+                )
+            metric_scores.append(
+                _score(
+                    name=self.name,
+                    metric="expected_findings_recalled",
+                    case_id=case.id,
+                    passed=aggregate_recall == 1.0,
+                    detail=aggregate_detail,
+                )
+            )
+            base_scores = self._finish(case.id, checks)
+            contract = base_scores.pop()
+            exact_match = aggregate_precision == 1.0 and aggregate_recall == 1.0
+            contract = _score(
+                name=self.name,
+                metric="contract_pass",
+                case_id=case.id,
+                passed=bool(contract.passed and exact_match),
+                detail=(
+                    "all checks passed"
+                    if contract.passed and exact_match
+                    else "finding set differs from exact expected outcome"
+                ),
+            )
+            return base_scores + metric_scores + [contract]
+
         required_stale = _integer_set(expected.get("required_stale_indices", []))
         required_deadweight = _integer_set(
             expected.get("required_deadweight_indices", [])

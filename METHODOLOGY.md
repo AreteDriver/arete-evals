@@ -56,6 +56,12 @@ The v1 structured-response grader operates on a decoded object. Regex is used
 only to identify a key/value shape inside the already-decoded rationale; it is
 not used to parse JSON.
 
+The v2 context-hygiene grader compares exact expected and predicted finding
+sets. It reports true positives, false positives, and false negatives through
+per-category and aggregate precision, recall, and F1. Empty expected sets are
+explicit negative controls: an empty prediction scores perfectly, while any
+reported finding reduces precision and fails the exact contract.
+
 ## 5. Replay and live execution
 
 Replay and live modes use the same cases and graders.

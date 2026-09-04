@@ -1,0 +1,17 @@
+id: explicit-contradiction
+labels: {slice: contradiction, source: curated, polarity: positive}
+input:
+  extension: .md
+  content: |
+    ## System
+    Always return the final result as JSON.
+
+    ## User
+    Never return JSON; the final result must be plain text only.
+expected:
+  total_segments: 2
+  minimum_staleness_score: 0.5
+  stale_indices: []
+  contradiction_pairs: [[0, 1]]
+  deadweight_indices: []
+  compression_groups: []

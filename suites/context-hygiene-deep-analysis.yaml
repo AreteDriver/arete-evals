@@ -1,9 +1,9 @@
 project: context-hygiene
-suite: deep-analysis-finding-recall
-dataset: ../datasets/context-hygiene-deep-analysis/v1
-dataset_version: v1
+suite: deep-analysis-finding-quality
+dataset: ../datasets/context-hygiene-deep-analysis/v2
+dataset_version: v2
 mode_default: replay
-replay_fixtures: ../fixtures/context-hygiene-deep-analysis-v1.yaml
+replay_fixtures: ../fixtures/context-hygiene-deep-analysis-v2.yaml
 n_samples: 3
 concurrency: 1
 retry:
@@ -49,9 +49,13 @@ thresholds:
     - metric: finding_references_valid
       min: 1.0
       must_not_decrease: true
-    - metric: expected_findings_recalled
+    - metric: finding_precision
       min: 1.0
-  win_metric: expected_findings_recalled
+    - metric: finding_recall
+      min: 1.0
+    - metric: finding_f1
+      min: 1.0
+  win_metric: finding_f1
   win_higher_is_better: true
   win_min_delta: 0.25
   on_regression: fail
