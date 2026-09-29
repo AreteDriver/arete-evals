@@ -3,17 +3,26 @@
 from __future__ import annotations
 
 import argparse
+import json
+from datetime import date
 from pathlib import Path
-
-from arete_evals import plugin as plugin  # noqa: F401
-from arete_evals.bundles import create_bundle
-from arete_evals.publication import publish_bundle
-from arete_evals.validation import validate_suite
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="arete-evals")
     sub = parser.add_subparsers(dest="command", required=True)
+    project = sub.add_parser("project", help="read-only project certification checks")
+    project_sub = project.add_subparsers(dest="project_command", required=True)
+    audit = project_sub.add_parser(
+        "audit", help="audit the deterministic project profile"
+    )
+    audit.add_argument("root", type=Path, nargs="?", default=Path("."))
+    audit.add_argument("--format", choices=["text", "json"], default="text")
+    audit.add_argument("--as-of", type=date.fromisoformat)
+    audit.add_argument("--require-clean", action="store_true")
+    audit.add_argument(
+        "--strict", action="store_true", help="fail on incomplete full certification"
+    )
     validate = sub.add_parser("validate", help="validate suite and fixture contracts")
     validate.add_argument("suite", type=Path)
 
@@ -46,6 +55,24 @@ def _parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "project":
+        from arete_evals.project import audit_project, render_audit
+
+        result = audit_project(
+            args.root, as_of=args.as_of, require_clean=args.require_clean
+        )
+        print(
+            json.dumps(result, indent=2, sort_keys=True)
+            if args.format == "json"
+            else render_audit(result)
+        )
+        return 1 if not result["automated_gates_passed"] or args.strict else 0
+
+    from arete_evals import plugin as plugin  # noqa: F401
+    from arete_evals.bundles import create_bundle
+    from arete_evals.publication import publish_bundle
+    from arete_evals.validation import validate_suite
+
     if args.command == "validate":
         result = validate_suite(args.suite)
         print(

@@ -1,14 +1,17 @@
 # Project status
 
+<!-- arete:package_version=0.2.0 -->
+<!-- arete:engine_version=0.2.0 -->
+
 | Attribute | Current state |
 |---|---|
 | Status | **RUNNABLE OFFLINE; LIVE EVIDENCE PENDING** |
-| Last verified | 2026-09-03 |
+| Last verified | 2026-09-29 |
 | Suite package | `arete-evals-suite==0.2.0` |
 | Engine | External `evalcore==0.2.0`, exact-pinned |
 | Canonical suites | `structured-response-integrity@v1`; `deep-analysis-finding-quality@v2` |
 | Versioned cases | 18 |
-| Automated tests | 30 |
+| Automated tests | See generated acceptance evidence; baseline 30 tests was verified before A–B changes |
 | Canonical replay | Both suites pass their frozen replay comparisons |
 | Public-project target | `AreteDriver/context-hygiene` selected and fast arm smoke-tested |
 | Live public-project run | Full fast/deep comparison not yet executed |
@@ -55,3 +58,20 @@ ceiling, and a second-person blinded review of a sample.
 This is independent public project work. It demonstrates evaluation practice
 and evidence discipline; it is not presented as employer production ownership,
 an industry benchmark, or a standalone evaluation platform.
+
+## A–B verification foundation (local candidate)
+
+CURRENT: schema-validated project manifest, deterministic read-only project audit,
+canonical authority map, annotated claim checks, safe-input checks and regression
+fixtures. See docs/PROJECT_AUDIT.md for exact implemented checks and limitations.
+PARTIAL: automation of the adopted organization standard; legacy artifact schema
+validation, live adapter robustness and remote/local reconciliation.
+PLANNED: Work Receipts, artifact trust model, packs and ecosystem contracts.
+PROPOSED: empirical model-routing evidence after representative task design.
+DEPRECATED: engine-consolidation/heuristic port notes in tools; retained as history.
+UNKNOWN: full project certification, coverage percentage and live model comparison.
+
+GitHub main remains the earlier documentation tree observed at `fad6995`; green
+hosted CI does not verify this local candidate. No paid run or public release is
+claimed. SECURITY.md records existing trusted-runner limitations. Deterministic
+audit success does not replace human orientation, semantic review or security review.

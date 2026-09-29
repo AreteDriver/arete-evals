@@ -22,7 +22,7 @@
     "dataset_version": {"type": "string"},
     "dataset_hash": {"type": "string"},
     "engine": {"type": "object"},
-    "mode": {"enum": ["replay", "http"]},
+    "mode": {"enum": ["replay", "http", "target"]},
     "revision": {"type": ["string", "null"]},
     "verdict": {"enum": ["pass", "warn", "fail"]},
     "treatments": {"type": "object"},

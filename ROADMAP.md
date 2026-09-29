@@ -1,10 +1,33 @@
-# Finish roadmap
+# Execution roadmap
+
+<!-- arete:package_version=0.2.0 -->
+<!-- arete:engine_version=0.2.0 -->
 
 The repository is an eval-suite consumer, not an engine-consolidation project.
-Work that does not improve suite validity, reproducibility, or public evidence
-is outside the v1 finish line.
+Project verification adds a bounded acceptance path alongside the existing
+suite evidence work; neither path owns execution or model routing.
 
-## Completed
+## Current milestone A–B and prioritized backlog
+
+1. A: reconcile repository truth, record baseline and adopted standards.
+2. B: implement manifest and read-only audit; test malformed/hostile projects;
+   reconcile docs; run deterministic self-audit and repeatable CI evidence.
+3. Review A–B evidence and perform the source standard's required manual reviews.
+   Hosted/local publication remains a separate gate through a reviewed PR.
+4. C (PLANNED): Work Receipts schema, explicit unknown telemetry and integrity
+   tests. See docs/PROJECT_AUDIT.md for the next bounded run.
+5. D–F (PLANNED): composable packs, model/agent outcome comparisons, then clean
+   Forgehand/Conduit/Supervisor contracts. No implementation in A–B.
+
+A–B acceptance: tests without skips, lint/format, both replay suites, safe-input
+fixtures, packaged schema and deterministic self-audit pass; evidence records
+unknowns and no unrelated changes. Full certification is pending human gates.
+Blockers: unpublished local implementation and outstanding manual review.
+Owner: AreteDriver. Review by 2026-11-24 (56-day active-project policy).
+Pause when no funded/current objective exists; preserve evidence and document
+resume conditions. Archive only with final disposition and successor recorded.
+
+## Existing suite work completed locally
 
 - [x] Resolve the `evalcore` namespace ambiguity by deliberately adopting and
   exact-pinning the external `evalcore==0.2.0` engine.
@@ -14,7 +37,8 @@ is outside the v1 finish line.
 - [x] Add known-good and known-bad fixtures, including false-positive controls.
 - [x] Add exact finding contracts, negative controls, and precision/recall/F1
   grading for the context-hygiene v2 dataset.
-- [x] Add suite, treatment, private-manifest, and public-manifest validation.
+- [x] Add suite/treatment checks and selected manifest/checksum validation
+  (full legacy runtime schema enforcement remains partial).
 - [x] Add immutable evidence bundles with complete outputs and checksums.
 - [x] Add review-gated public export and harden triage rendering.
 - [x] Add unit, adapter, integration, immutability, and publication tests.

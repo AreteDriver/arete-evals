@@ -1,3 +1,4 @@
 # Deliberately adopted external engine. Keep exact pins aligned with pyproject.toml.
 evalcore==0.2.0
 PyYAML==6.0.3
+jsonschema==4.26.0

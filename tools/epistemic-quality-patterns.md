@@ -1,5 +1,9 @@
 # Epistemic Quality Patterns
 
+**DEPRECATED reference proposal:** the engine-consolidation roadmap below was
+superseded. These uncalibrated heuristics are not implemented or authoritative.
+Retained for provenance; see ROADMAP.md for current direction.
+
 **Source:** Extracted from `AreteDriver/signal-audit` (archived 2026-06-22)  
 **Purpose:** Heuristic regex-based scoring for AI output quality — hedging, overconfidence, contradictions, filler, citations, reasoning markers, structure.  
 **Target:** Port into arete-evals engine as an `EpistemicQuality` metric plugin (per ROADMAP Phase 2: cannibalize `signal analyzers/quality.py`).

@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import yaml
+from jsonschema import Draft202012Validator
 
 from arete_evals import plugin as plugin  # noqa: F401
 from arete_evals.validation import (
@@ -24,8 +25,10 @@ def main() -> None:
     summaries = [validate_suite(path) for path in suite_paths]
 
     schema_paths = sorted((ROOT / "schemas").glob("*.json"))
+    schema_paths += sorted((ROOT / "arete_evals" / "schemas").glob("*.json"))
     for path in schema_paths:
         document = json.loads(path.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(document)
         if document.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             raise ValueError(f"{path}: unsupported or missing JSON Schema version")
 

@@ -1,12 +1,34 @@
 # arete-evals
 
-**Versioned evaluation suites, target adapters, calibrated graders, and the
+<!-- arete:package_version=0.2.0 -->
+<!-- arete:engine_version=0.2.0 -->
+
+**Versioned evaluation suites, target adapters, deterministic graders, and the
 evidence bundles produced by running them.**
 
 `arete-evals` is a consumer of the independently maintained
 [`evalcore`](https://pypi.org/project/evalcore/) engine. It does not implement a
-second harness. This repository owns the cases, expected outcomes, adapters,
+second suite harness. The read-only project audit is independent of suite execution. This repository owns the cases, expected outcomes, adapters,
 graders, replay fixtures, run manifests, triage, and public evidence.
+
+## Project verification (local candidate)
+
+Audience: maintainers and agents needing bounded acceptance evidence. Success:
+reproducible checks, explicit unknowns, no claim stronger than its artifacts.
+Canonical repository: `AreteDriver/arete-evals`, branch `main`. Owner: AreteDriver.
+Classification: active. This local implementation is ahead of the hosted main;
+see [baseline](docs/BASELINE.md) and [STATUS](STATUS.md).
+
+```bash
+arete-evals project audit .
+arete-evals project audit . --format json
+```
+
+The deterministic subset returns PASS WITH CONDITIONS when its gates pass;
+full certification and human scoring remain UNKNOWN. It does not execute manifest
+commands or tests. See [audit contract](docs/PROJECT_AUDIT.md),
+[manifest](PROJECT_MANIFEST.yaml), [architecture](ARCHITECTURE.md), and
+[agent guide](AGENTS.md). No orchestration, model routing or worker execution.
 
 ## 60-second review
 
@@ -75,8 +97,8 @@ Versioned cases + expected outcomes
               │
       ┌───────┴────────┐
       ▼                ▼
-Deterministic       Calibrated
-graders             judge graders
+Deterministic       PLANNED
+graders             calibrated judges
       └───────┬────────┘
               ▼
  Immutable run bundle

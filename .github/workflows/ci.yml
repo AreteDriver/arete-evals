@@ -16,7 +16,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
@@ -30,16 +30,15 @@ jobs:
           python -m pip install --no-deps --no-build-isolation -e .
       - name: Compile validation scripts
         run: python -m compileall -q arete_evals scripts tests
-      - name: Lint and formatting
+      - name: Verify project and retain evidence
+        run: python scripts/verify_project.py --out /tmp/arete-project-evidence
+      - name: Check installed wheel outside source tree
         run: |
-          ruff format --check arete_evals tests scripts
-          ruff check arete_evals tests scripts
-      - name: Validate suites and run records
-        run: python scripts/validate_repo.py
-      - name: Reproduce stored metric fix
-        run: python scripts/verify_fix.py
-      - name: Run unit and integration tests
-        run: python -m unittest discover -s tests -v
+          python -m pip wheel --no-deps --no-build-isolation . -w /tmp/arete-wheel
+          python -m venv /tmp/arete-installed
+          /tmp/arete-installed/bin/python -m pip install -r requirements-ci.txt /tmp/arete-wheel/*.whl
+          cd /tmp
+          /tmp/arete-installed/bin/arete-evals project audit "$GITHUB_WORKSPACE" --require-clean
       - name: Build canonical replay bundle
         run: |
           python -m arete_evals.cli run \
@@ -48,3 +47,19 @@ jobs:
             --bundle-id ci-replay \
             --created-at 2026-08-31T12:00:00+00:00
           python -c "import json; from pathlib import Path; p=Path('/tmp/arete-evals-runs/ci-replay/manifest.json'); m=json.loads(p.read_text()); assert m['verdict']=='pass' and not m['outputs_truncated']"
+          python -m arete_evals.cli run \
+            --suite suites/context-hygiene-deep-analysis.yaml \
+            --out /tmp/arete-evals-runs \
+            --bundle-id ci-context-replay \
+            --created-at 2026-08-31T12:00:00+00:00
+          python -c "import json; from pathlib import Path; m=json.loads(Path('/tmp/arete-evals-runs/ci-context-replay/manifest.json').read_text()); assert m['verdict']=='pass'"
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: project-verification
+          path: |
+            /tmp/arete-project-evidence
+            /tmp/arete-evals-runs
+          if-no-files-found: error
+          retention-days: 14

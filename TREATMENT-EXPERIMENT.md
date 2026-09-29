@@ -63,7 +63,7 @@ zero is inconclusive.
 
 Do not begin this experiment until:
 
-- the v1 structured-response suite has one canonical live public-project
+- the selected context-hygiene suite has one canonical live public-project
   bundle;
 - live adapter metadata records setup and teardown status;
 - the holdout and review protocol are frozen;
