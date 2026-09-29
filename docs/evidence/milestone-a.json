@@ -1,0 +1,21 @@
+{
+  "schema_version": "repository-baseline-v1",
+  "observed_on": "2026-09-29",
+  "revision": "5e0f3b8706b92b8923c8daa6236d0dc16d17ac08",
+  "initial_worktree_clean": true,
+  "hosted_main": "fad6995d06a013e137914c6438b18dd78a8ac9f5",
+  "hosted_ci_run": 33478558892,
+  "hosted_ci_conclusion": "success",
+  "hosted_ci_verifies_local_implementation": false,
+  "python": "3.12.14",
+  "dependency_install": "PASS: requirements-ci.txt in fresh temporary environment",
+  "commands": [
+    {"argv": ["python", "-m", "unittest", "discover", "-s", "tests", "-q"], "exit_code": 0, "tests": 30},
+    {"argv": ["python", "scripts/validate_repo.py"], "exit_code": 0, "suites": 2, "cases": 18, "schemas": 3, "public_bundles": 1},
+    {"argv": ["ruff", "check", "arete_evals", "tests", "scripts"], "exit_code": 0},
+    {"argv": ["ruff", "format", "--check", "arete_evals", "tests", "scripts"], "exit_code": 0}
+  ],
+  "coverage_percent": null,
+  "gate": "PASS",
+  "limitations": ["historical snapshot, not current certification", "no live model run", "no authenticated independent review", "legacy artifact validators perform selected checks only"]
+}
