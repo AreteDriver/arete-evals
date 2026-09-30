@@ -2,6 +2,20 @@
 
 LLM evaluation suites — and the records of what running them found.
 
+## Reproduce the stored regression check offline
+
+This path uses the committed responses; it makes no model or product API calls and does not require the separate `evalcore` engine. The hash-pinned dependency file supports CPython 3.12 on Linux x86_64 and macOS ARM64. Run from a clean checkout in one of those environments:
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install --require-hashes -r requirements-ci.txt
+python scripts/validate_repo.py
+python scripts/verify_fix.py
+```
+
+The recorded suite contains 20 cases and one stored run. The corrected absence gates should flag none of those stored responses. This verifies the documented false-positive correction; it does not measure recall without known-positive leak cases or prove current deployed behavior. For fresh model evaluations, the separate engine and product adapter dependencies described below are still required.
+
 The evaluation **harness** lives in **`evalcore`** — a standalone, installable engine extracted from animus-forge: suites, structural and rubric metrics, A/B compare with bootstrap CI, and two failure taxonomies. This repository holds the **suites run against public projects** and the **run records** — including the runs where the eval itself turned out to be wrong. Install the engine with `pip install -e ../evalcore` (see `requirements.txt`).
 
 The premise: a harness with passing self-tests has caught nothing. Eval *engineering* is building the framework. Eval *practice* is running it against messy production output and acting on the verdict. This repo is the practice.
