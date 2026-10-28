@@ -57,13 +57,13 @@ jobs:
             --bundle-id ci-context-replay \
             --created-at 2026-08-31T12:00:00+00:00
           python -c "import json; from pathlib import Path; m=json.loads(Path('/tmp/arete-evals-runs/ci-context-replay/manifest.json').read_text()); assert m['verdict']=='pass'"
-      - name: Upload verification evidence
+      - name: Summarize verification evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-        with:
-          name: project-verification
-          path: |
-            /tmp/arete-project-evidence
-            /tmp/arete-evals-runs
-          if-no-files-found: error
-          retention-days: 14
+        run: |
+          for path in /tmp/arete-project-evidence /tmp/arete-evals-runs; do
+            if [ -e "$path" ]; then
+              find "$path" -maxdepth 2 -type f -print | sort
+            else
+              echo "missing: $path"
+            fi
+          done
