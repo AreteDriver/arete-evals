@@ -30,6 +30,14 @@ commands or tests. See [audit contract](docs/PROJECT_AUDIT.md),
 [manifest](PROJECT_MANIFEST.yaml), [architecture](ARCHITECTURE.md), and
 [agent guide](AGENTS.md). No orchestration, model routing or worker execution.
 
+## Work receipts (local candidate)
+
+Finalize a schema-validated work record, verify its artifact bytes, and render a
+human-readable account with `arete-evals receipt finalize`, `verify`, and `render`.
+Unknown telemetry stays null. Integrity is separate from work acceptance and human
+approval. The fixed acceptance script emits its own receipt. See
+[Work Receipts](docs/WORK_RECEIPTS.md) for the contract, commands and trust limits.
+
 ## 60-second review
 
 ```bash

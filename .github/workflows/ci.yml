@@ -37,6 +37,8 @@ jobs:
           python -m pip wheel --no-deps --no-build-isolation . -w /tmp/arete-wheel
           python -m venv /tmp/arete-installed
           /tmp/arete-installed/bin/python -m pip install -r requirements-ci.txt /tmp/arete-wheel/*.whl
+          /tmp/arete-installed/bin/arete-evals receipt verify /tmp/arete-project-evidence/receipt.json --artifacts-root /tmp/arete-project-evidence
+          /tmp/arete-installed/bin/arete-evals receipt render /tmp/arete-project-evidence/receipt.json
           cd /tmp
           /tmp/arete-installed/bin/arete-evals project audit "$GITHUB_WORKSPACE" --require-clean
       - name: Build canonical replay bundle

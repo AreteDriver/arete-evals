@@ -6,7 +6,7 @@
 | Attribute | Current state |
 |---|---|
 | Status | **RUNNABLE OFFLINE; LIVE EVIDENCE PENDING** |
-| Last verified | 2026-09-29 |
+| Last verified | 2026-10-27 |
 | Suite package | `arete-evals-suite==0.2.0` |
 | Engine | External `evalcore==0.2.0`, exact-pinned |
 | Canonical suites | `structured-response-integrity@v1`; `deep-analysis-finding-quality@v2` |
@@ -66,7 +66,11 @@ canonical authority map, annotated claim checks, safe-input checks and regressio
 fixtures. See docs/PROJECT_AUDIT.md for exact implemented checks and limitations.
 PARTIAL: automation of the adopted organization standard; legacy artifact schema
 validation, live adapter robustness and remote/local reconciliation.
-PLANNED: Work Receipts, artifact trust model, packs and ecosystem contracts.
+CURRENT: versioned Work Receipts, safe finalization/verification/rendering and
+fixed-verifier receipts. See docs/WORK_RECEIPTS.md.
+PARTIAL: artifact trust model; content integrity is checked, authenticity and
+work acceptance remain UNKNOWN.
+PLANNED: authenticated attestations, packs and ecosystem contracts.
 PROPOSED: empirical model-routing evidence after representative task design.
 DEPRECATED: engine-consolidation/heuristic port notes in tools; retained as history.
 UNKNOWN: full project certification, coverage percentage and live model comparison.

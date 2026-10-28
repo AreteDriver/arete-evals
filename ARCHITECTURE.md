@@ -7,7 +7,7 @@ Owner: AreteDriver. Reviewed: 2026-09-29. Scope: local candidate implementation.
 ## CURRENT
 
 Python 3.11+ package `arete-evals-suite`. CLI entry point `arete_evals.cli:main`.
-Two independent evaluation paths share a package, not a new orchestration layer:
+Three independent evidence paths share a package, not a new orchestration layer:
 
 1. Existing suites → adapters → external evalcore engine → deterministic graders
    → private run bundles → human-attributed public derivatives. `validation.py`
@@ -18,6 +18,12 @@ Two independent evaluation paths share a package, not a new orchestration layer:
    No target Python imports, manifest-command execution, networking, writes to
    the audited target, model calls or approval policy. The schema ships inside
    the wheel under `arete_evals/schemas/`; the repository does not duplicate it.
+
+3. Work receipt draft → packaged schema and consistency checks → non-overwriting
+   finalized JSON envelope → artifact byte verification and text rendering.
+   `receipts.py` reuses bounded reads from project audit, not legacy bundle readers.
+   Fixed acceptance emits measured receipt evidence via `receipt_for_acceptance.py`.
+   Receipt validation never executes producer-supplied commands.
 
 The project audit reads at most 1 MiB per input, refuses symlink components and
 traversal, bounds YAML nesting, rejects aliases/duplicates/custom tags, and runs
@@ -44,8 +50,9 @@ Project-folder standard automation is PARTIAL: exact annotated claim checking
 and file evidence cannot establish semantic truth, full safety or human readiness.
 Full certification is UNKNOWN. Read `docs/PROJECT_AUDIT.md` for exact guarantees.
 Legacy artifact schema enforcement and hostile-bundle ingestion are PARTIAL.
-Work receipts, trust progression, eval packs, comparisons across workers and
-integration contracts are PLANNED in ROADMAP; calibrated judges are PLANNED.
+Work Receipts and bounded integrity progression are CURRENT locally. Authenticated
+trust promotion, eval packs, worker comparisons and integration contracts remain
+PLANNED in ROADMAP; calibrated judges are PLANNED.
 
 ## Decisions (2026-09-29)
 
@@ -59,3 +66,14 @@ integration contracts are PLANNED in ROADMAP; calibrated judges are PLANNED.
   hand-maintaining a second manifest type system. Package the schema in the wheel.
 - Restrict v1 to data inspection. A manifest command is never execution authority.
   Any future runner needs a separate explicit trust design outside this audit.
+
+## Receipt decision (2026-10-27)
+
+Use a separate strict JSON receipt contract and bounded audit readers. Existing
+suite lifecycle terms describe evaluation quality; new receipt strength describes
+only recorded data, checked content and an external digest match. This avoids
+turning self-reported tests into verified work. Unknown telemetry is mandatory
+null, not estimated. No new dependencies or external services are introduced.
+Revisit stronger trust only with independently verified attestations bound to an
+exact artifact. The local acceptance script is the first producer and records
+only its own fixed verification run, not unobserved agent work.

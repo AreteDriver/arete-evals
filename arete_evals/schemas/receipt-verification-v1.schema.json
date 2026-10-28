@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "receipt_sha256",
+    "integrity",
+    "evidence_strength",
+    "artifacts",
+    "subject_bound",
+    "human_review_required",
+    "work_acceptance",
+    "authenticity",
+    "independent_reproduction",
+    "human_approval",
+    "verification_scope"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "receipt-verification-v1"
+    },
+    "status": {
+      "enum": [
+        "PASS WITH CONDITIONS",
+        "FAIL",
+        "UNKNOWN"
+      ]
+    },
+    "receipt_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "integrity": {
+      "enum": [
+        "ANCHORED",
+        "SELF_CONSISTENT"
+      ]
+    },
+    "evidence_strength": {
+      "enum": [
+        "RECORDED",
+        "CONTENT_CHECKED",
+        "ANCHORED_CONTENT"
+      ]
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "UNKNOWN"
+            ]
+          }
+        }
+      }
+    },
+    "subject_bound": {
+      "type": "boolean"
+    },
+    "human_review_required": {
+      "type": "boolean"
+    },
+    "work_acceptance": {
+      "const": "UNKNOWN"
+    },
+    "authenticity": {
+      "const": "UNKNOWN"
+    },
+    "independent_reproduction": {
+      "const": "UNKNOWN"
+    },
+    "human_approval": {
+      "const": "UNKNOWN"
+    },
+    "verification_scope": {
+      "const": "receipt-and-artifact-integrity"
+    }
+  }
+}

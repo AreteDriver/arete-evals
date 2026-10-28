@@ -11,6 +11,25 @@ from pathlib import Path
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="arete-evals")
     sub = parser.add_subparsers(dest="command", required=True)
+    receipts = sub.add_parser(
+        "receipt", help="validate, finalize and inspect work evidence"
+    )
+    receipt_sub = receipts.add_subparsers(dest="receipt_command", required=True)
+    finalize = receipt_sub.add_parser(
+        "finalize", help="seal a draft into a new receipt"
+    )
+    finalize.add_argument("path", type=Path)
+    finalize.add_argument("--out", type=Path, required=True)
+    verify = receipt_sub.add_parser(
+        "verify", help="check integrity and declared artifact bytes"
+    )
+    verify.add_argument("path", type=Path)
+    verify.add_argument("--artifacts-root", type=Path)
+    verify.add_argument("--expected-sha256")
+    render = receipt_sub.add_parser(
+        "render", help="render an integrity-checked receipt"
+    )
+    render.add_argument("path", type=Path)
     project = sub.add_parser("project", help="read-only project certification checks")
     project_sub = project.add_subparsers(dest="project_command", required=True)
     audit = project_sub.add_parser(
@@ -55,6 +74,43 @@ def _parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "receipt":
+        from arete_evals.project import InputError
+        from arete_evals.receipts import (
+            finalize_receipt,
+            render_receipt,
+            verify_receipt,
+        )
+
+        try:
+            if args.receipt_command == "finalize":
+                print(json.dumps({"sha256": finalize_receipt(args.path, args.out)}))
+                return 0
+            if args.receipt_command == "render":
+                print(render_receipt(args.path))
+                return 0
+            result = verify_receipt(
+                args.path,
+                artifacts_root=args.artifacts_root,
+                expected_sha256=args.expected_sha256,
+            )
+            print(json.dumps(result, sort_keys=True, indent=2))
+            return 0 if result["status"] == "PASS WITH CONDITIONS" else 1
+        except InputError as exc:
+            print(json.dumps({"status": "FAIL", "error": str(exc)}))
+            return 1
+        except OSError:
+            # Do not echo untrusted values or file contents in CLI diagnostics.
+            print(
+                json.dumps(
+                    {
+                        "status": "FAIL",
+                        "error": "receipt input, integrity or output validation failed",
+                    }
+                )
+            )
+            return 1
+
     if args.command == "project":
         from arete_evals.project import audit_project, render_audit
 

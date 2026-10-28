@@ -162,3 +162,12 @@ incomplete. It is therefore historical evidence, not a canonical v1 run.
 
 The current adversarial replay independently covers the failure family with
 known-bad JSON leaks and known-good ordinary uses of “recommendations.”
+
+## 12. Work receipt evidence
+
+Work Receipts record a bounded task, its reported results and available telemetry.
+The canonical contract and integrity-strength meanings are in
+[docs/WORK_RECEIPTS.md](docs/WORK_RECEIPTS.md). These do not replace the suite
+lifecycle above. Passing receipt integrity checks cannot establish that tests
+actually ran, that a producer is authentic, or that a human approved an artifact.
+The fixed acceptance producer records only directly measured verification data.

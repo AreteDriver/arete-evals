@@ -90,12 +90,9 @@ Evidence is tied to tracked and nonignored source digests and Git state; checksu
 checks, not signatures or independent approval. CI uploads the evidence even on
 failure. Do not claim hosted validation until that revision actually runs there.
 
-## Next bounded milestone: Work Receipts (PLANNED)
+## Work Receipts (Milestone C)
 
-After A–B review: define a versioned receipt with null telemetry, exact task/source
-identity, inspected/modified files, test and regression outcomes, human-review
-requirement and integrity rules. Reuse existing evidence-state terminology
-(Designed, Replay-validated, Target-validated, Calibrated) where applicable; do
-not assign permanent trust to a model. Bind trust to exact artifacts. Add hostile
-fixtures and tamper tests before any transport contract. No receipt, trust-level,
-eval-pack, worker-comparison or ecosystem integration implementation exists yet.
+The local candidate now implements versioned receipts and bounded integrity
+verification. See [WORK_RECEIPTS.md](WORK_RECEIPTS.md) for the single authoritative
+contract. Project audit still does not execute tests or authenticate receipt
+producers. Full certification and semantic/human review remain UNKNOWN.

@@ -38,3 +38,14 @@ Private outputs stay ignored under runs/private. Hashes-only publication still
 requires actual human review; a reviewer string is not authenticated approval.
 Run-directory non-overwrite and checksums do not prevent deliberate filesystem
 editing. Preserve original evidence and create new versions for corrections.
+
+## Work Receipts (2026-10-27)
+
+Receipt inputs use a separate JSON schema with bounded, safe reads; they never
+enter legacy bundle readers. Commands and claimed producer roles are data only.
+Finalized receipts are exclusively created with restrictive permissions, and
+verification checks envelope and artifact hashes. A self-digest is not a signature:
+use a separately retained expected digest to detect replacement. Human approval,
+independent reproduction and work acceptance remain UNKNOWN. Review producer
+metadata before publishing; do not put secrets in commands or narrative fields.
+See docs/WORK_RECEIPTS.md for limits and exact guarantees.

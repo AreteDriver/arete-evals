@@ -56,11 +56,11 @@ agent:
   - runs/public
   - results
 execution:
-  milestone: 'A-B: repository truth and deterministic project audit'
+  milestone: 'C: Work Receipts and bounded integrity evidence'
   next_actions:
   - Review A-B evidence and manual certification conditions
   - Reconcile the unpublished implementation through a reviewed PR
-  - Begin bounded Work Receipts design only after A-B acceptance
+  - Review Work Receipts evidence before broader trust promotion or eval packs
   blockers:
   - Full certification needs independent manual reviews
   - Local implementation has not been published to main

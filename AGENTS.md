@@ -41,4 +41,6 @@ audit and evidence reproduction before committing a milestone. Report UNKNOWN
 for missing evidence; passing deterministic checks is not full certification.
 
 Stop on failed blocking gates, material authority conflicts or scope expansion.
-Current bounded scope is ROADMAP Milestones A–B; later phases remain deferred.
+Current bounded scope is Milestone C: Work Receipts and bounded integrity evidence.
+Read docs/WORK_RECEIPTS.md for its contract. Packs, routing and external integrations
+remain deferred; a valid receipt does not authorize external actions.

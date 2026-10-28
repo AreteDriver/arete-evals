@@ -8,9 +8,12 @@ import json
 import os
 import subprocess
 import sys
+import time
 from datetime import date
 from importlib.metadata import version
 from pathlib import Path
+
+from receipt_for_acceptance import write_receipt
 
 from arete_evals.project import _git, audit_project
 
@@ -55,6 +58,8 @@ def main() -> int:
         [sys.executable, "scripts/validate_repo.py"],
         [sys.executable, "scripts/verify_fix.py"],
     ]
+    started = time.monotonic()
+    starting_revision = _git(ROOT, "rev-parse", "HEAD").strip()
     before = snapshot()
     records = []
     for index, command in enumerate(commands):
@@ -99,6 +104,7 @@ def main() -> int:
         "schema_version": "project-acceptance-v1",
         "passed": passed,
         "revision": audit["revision"],
+        "starting_revision": starting_revision,
         "clean": audit["clean"],
         "source_sha256": sources,
         "source_unchanged_during_verification": unchanged,
@@ -116,6 +122,7 @@ def main() -> int:
     (out / "manifest.json").write_text(
         json.dumps(report, sort_keys=True, indent=2) + "\n"
     )
+    write_receipt(out, report, before, time.monotonic() - started)
     print(
         json.dumps({"passed": passed, "out": str(out), "full_certification": "UNKNOWN"})
     )

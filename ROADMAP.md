@@ -7,15 +7,17 @@ The repository is an eval-suite consumer, not an engine-consolidation project.
 Project verification adds a bounded acceptance path alongside the existing
 suite evidence work; neither path owns execution or model routing.
 
-## Current milestone A–B and prioritized backlog
+## Milestones and prioritized backlog
 
 1. A: reconcile repository truth, record baseline and adopted standards.
 2. B: implement manifest and read-only audit; test malformed/hostile projects;
    reconcile docs; run deterministic self-audit and repeatable CI evidence.
 3. Review A–B evidence and perform the source standard's required manual reviews.
    Hosted/local publication remains a separate gate through a reviewed PR.
-4. C (PLANNED): Work Receipts schema, explicit unknown telemetry and integrity
-   tests. See docs/PROJECT_AUDIT.md for the next bounded run.
+4. C (CURRENT local candidate): Work Receipts, explicit unknown telemetry,
+   bounded integrity states and fixed-verifier dogfooding. Acceptance: schema and
+   adversarial tests, installed CLI, full regression checks, receipt byte checks
+   and truthful failure recording. See docs/WORK_RECEIPTS.md.
 5. D–F (PLANNED): composable packs, model/agent outcome comparisons, then clean
    Forgehand/Conduit/Supervisor contracts. No implementation in A–B.
 
