@@ -1,0 +1,8 @@
+id: drop-candidates
+labels: {slice: recommendations, validity: expected-valid}
+input:
+  query: Identify one removal candidate and explain why.
+expected:
+  rationale_min_chars: 20
+  details_required: true
+  min_drop_candidates: 1

@@ -1,0 +1,125 @@
+schema_version: project-manifest-v1
+project:
+  name: arete-evals
+  purpose: Evidence that AI-generated work satisfies its claimed requirements.
+  classification: active
+  owner: AreteDriver
+  last_reviewed: '2026-09-29'
+  review_after_days: 56
+  boundaries:
+  - Suite evidence and deterministic project verification within this repository
+  non_goals:
+  - Orchestration, execution workers, model runtime, routing policy and portfolio
+    management
+canonical:
+  repository: https://github.com/AreteDriver/arete-evals
+  branch: main
+  documentation_root: .
+authority:
+  context:
+    path: README.md
+    role_note: Purpose and audience
+  charter:
+    path: README.md
+    role_note: Mission, boundaries and success criteria
+  current_state:
+    path: STATUS.md
+    role_note: Existing canonical current-state document; no duplicate CURRENT_STATE
+  requirements:
+    path: README.md
+    role_note: Bounded acceptance requirements for this developer library
+  architecture:
+    path: ARCHITECTURE.md
+    role_note: Components and responsibility boundaries
+  roadmap:
+    path: ROADMAP.md
+    role_note: Prioritized execution and deferred work
+  backlog:
+    path: ROADMAP.md
+    role_note: Ordered bounded milestones double as backlog
+  decisions:
+    path: ARCHITECTURE.md
+    role_note: Dated decisions with rationale and reversal conditions
+  testing:
+    path: METHODOLOGY.md
+    role_note: Evaluation methodology and validation commands in AGENTS
+  security:
+    path: SECURITY.md
+    role_note: Trust boundary and known limitations
+  agent:
+    path: AGENTS.md
+    role_note: Contributor and agent entry point
+agent:
+  allowed_paths:
+  - .
+  forbidden_paths:
+  - runs/public
+  - results
+execution:
+  milestone: 'C: Work Receipts and bounded integrity evidence'
+  next_actions:
+  - Review A-B evidence and manual certification conditions
+  - Reconcile the unpublished implementation through a reviewed PR
+  - Review Work Receipts evidence before broader trust promotion or eval packs
+  blockers:
+  - Full certification needs independent manual reviews
+  - Local implementation has not been published to main
+  acceptance:
+  - Existing and new tests pass without skips
+  - Both replay suites pass
+  - Manifest and self-audit deterministic gates pass
+  - CI produces reproducible evidence; full certification remains explicitly unknown
+verification:
+  tests:
+  - python
+  - -m
+  - unittest
+  - discover
+  - -s
+  - tests
+  - -v
+  lint:
+  - ruff
+  - check
+  - arete_evals
+  - tests
+  - scripts
+  build:
+  - python
+  - -m
+  - pip
+  - wheel
+  - --no-deps
+  - --no-build-isolation
+  - .
+standard:
+  id: arete-project-folder-v1
+  source: docs/standards/PROJECT_FOLDER_SETUP_EVALUATION_STANDARD.md
+  sha256: 3a2d550e3b0d22d0e1c0622efc97b2854d17e543a2461c831875c0b276bd1da4
+  profile: deterministic-v1
+  exceptions:
+  - Document roles share existing files as explained in authority role_note
+  - Deterministic subset only; no weighted score or full certification without manual
+    review
+claims:
+  package_version:
+    value: 0.2.0
+    documents:
+    - README.md
+    - STATUS.md
+    - ARCHITECTURE.md
+    - ROADMAP.md
+    - AGENTS.md
+    evidence:
+    - pyproject.toml
+  engine_version:
+    value: 0.2.0
+    documents:
+    - README.md
+    - STATUS.md
+    - ARCHITECTURE.md
+    - ROADMAP.md
+    - AGENTS.md
+    evidence:
+    - pyproject.toml
+lifecycle: null

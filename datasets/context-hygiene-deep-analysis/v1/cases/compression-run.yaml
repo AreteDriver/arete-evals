@@ -1,0 +1,19 @@
+id: compression-run
+labels: {slice: compression, source: curated}
+input:
+  extension: .md
+  content: |
+    ## User
+    Summarize the deployment investigation.
+
+    ## Assistant
+    First update: the service is healthy.
+
+    ## Assistant
+    Second update: the database is healthy.
+
+    ## Assistant
+    Third update: the queue is healthy.
+expected:
+  total_segments: 4
+  minimum_compression_candidates: 1

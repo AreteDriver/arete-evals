@@ -1,0 +1,20 @@
+id: informative-short-reply
+labels: {slice: deadweight-near-miss, source: curated, polarity: negative}
+input:
+  extension: .md
+  content: |
+    ## User
+    Which database should the service use?
+
+    ## Assistant
+    PostgreSQL.
+
+    ## User
+    Use that database in the migration plan.
+expected:
+  total_segments: 3
+  minimum_staleness_score: 0.5
+  stale_indices: []
+  contradiction_pairs: []
+  deadweight_indices: []
+  compression_groups: []

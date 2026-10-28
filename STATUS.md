@@ -1,34 +1,81 @@
-# Project Status
+# Project status
 
-| Attribute | Value |
-|-----------|-------|
-| Status | **PARTIAL — public evaluation evidence repository** |
-| Last verified | 2026-08-31 |
-| Installable? | Supporting requirements only; the evaluation engine is not included |
-| Re-runnable? | Not end-to-end from this repository alone |
-| Documented? | README, methodology, suites, run record, and triage record |
+<!-- arete:package_version=0.2.0 -->
+<!-- arete:engine_version=0.2.0 -->
 
-## What works
+| Attribute | Current state |
+|---|---|
+| Status | **RUNNABLE OFFLINE; LIVE EVIDENCE PENDING** |
+| Last verified | 2026-10-27 |
+| Suite package | `arete-evals-suite==0.2.0` |
+| Engine | External `evalcore==0.2.0`, exact-pinned |
+| Canonical suites | `structured-response-integrity@v1`; `deep-analysis-finding-quality@v2` |
+| Versioned cases | 18 |
+| Automated tests | See generated acceptance evidence; baseline 30 tests was verified before A–B changes |
+| Canonical replay | Both suites pass their frozen replay comparisons |
+| Public-project target | `AreteDriver/context-hygiene` selected and fast arm smoke-tested |
+| Live public-project run | Full fast/deep comparison not yet executed |
 
-- A public suite definition for the documented BenchGoblins Ask evaluation.
-- A retained JSON run record and human-readable triage record.
-- A browser-based triage helper for inspecting run records.
-- A methodology that separates evaluation-framework construction from evaluation practice.
+## Working now
 
-## What does not work yet
+- Clean-checkout installation through `pip install -e .`.
+- Complete replay coverage for baseline and candidate variants.
+- Parsed structured-response grading with case-specific expected outcomes.
+- Adversarial fixtures covering the historical leak and false-positive shape.
+- Live HTTP adapter with environment-only credentials, bounded timeouts, and
+  retry classification.
+- Isolated `context-hygiene` CLI adapter with frozen fast/deep treatments,
+  provider token/retry limits, and structured precision/recall/F1 grading.
+- Exact finding contracts plus clean and adversarial near-misses that penalize
+  false positives instead of rewarding over-reporting.
+- Immutable private bundles with full outputs, suite/dataset hashes, exact
+  engine version, treatment fingerprints, and artifact checksums.
+- Human-attributed public export that defaults to hashes instead of output.
+- CI validation, tests, replay execution, and bundle assertions.
 
-- The referenced evaluation harness is not packaged in this repository.
-- There is no automated CI that reruns suites against live public projects.
-- There is no hosted trend dashboard.
-- The recorded result demonstrates one documented run; it is not a general performance claim.
+## Honest limitations
 
-## 60-second inspection
+- No canonical fast/deep bundle has been produced with model credentials yet.
+- The public target does not calculate currency cost; the live protocol uses
+  token/request bounds plus a provider-side budget ceiling.
+- No calibrated LLM judge is enabled; v1 uses deterministic graders only.
+- The replay datasets are focused 10-case and 8-case regression suites, not a
+  broad model benchmark.
+- The committed public replay is based on curated adversarial fixtures, not
+  production traffic.
+- The historical BenchGoblins record contains truncated output prefixes and
+  incomplete provenance. It is excluded from canonical v1 claims.
 
-1. Read `results/benchgoblins-ask-6ea664d3.triage.md`.
-2. Inspect `results/benchgoblins-ask-6ea664d3.json`.
-3. Compare the evidence with `suites/benchgoblins-ask.yaml`.
-4. Review `METHODOLOGY.md`.
+## Definition of v1 complete
+
+V1 becomes complete when the committed `context-hygiene` suite is run against
+one exact public target revision with its frozen fast and deep treatments,
+complete private outputs, a reviewed public derivative, an approved spend
+ceiling, and a second-person blinded review of a sample.
 
 ## Scope
 
-This is independent public project work. It demonstrates evaluation practice and evidence discipline; it is not presented as employer production ownership, an industry benchmark, or a standalone evaluation platform.
+This is independent public project work. It demonstrates evaluation practice
+and evidence discipline; it is not presented as employer production ownership,
+an industry benchmark, or a standalone evaluation platform.
+
+## A–B verification foundation (local candidate)
+
+CURRENT: schema-validated project manifest, deterministic read-only project audit,
+canonical authority map, annotated claim checks, safe-input checks and regression
+fixtures. See docs/PROJECT_AUDIT.md for exact implemented checks and limitations.
+PARTIAL: automation of the adopted organization standard; legacy artifact schema
+validation, live adapter robustness and remote/local reconciliation.
+CURRENT: versioned Work Receipts, safe finalization/verification/rendering and
+fixed-verifier receipts. See docs/WORK_RECEIPTS.md.
+PARTIAL: artifact trust model; content integrity is checked, authenticity and
+work acceptance remain UNKNOWN.
+PLANNED: authenticated attestations, packs and ecosystem contracts.
+PROPOSED: empirical model-routing evidence after representative task design.
+DEPRECATED: engine-consolidation/heuristic port notes in tools; retained as history.
+UNKNOWN: full project certification, coverage percentage and live model comparison.
+
+GitHub main remains the earlier documentation tree observed at `fad6995`; green
+hosted CI does not verify this local candidate. No paid run or public release is
+claimed. SECURITY.md records existing trusted-runner limitations. Deterministic
+audit success does not replace human orientation, semantic review or security review.

@@ -2,10 +2,11 @@ __pycache__/
 *.pyc
 
 .venv/
-__pycache__/
 
 # Security: prevent secret files from being committed
 .env
+*.egg-info/
+runs/private/
 .env.local
 .envrc
 *.pem
@@ -15,3 +16,8 @@ id_ecdsa*
 id_ed25519*
 *.p12
 secrets.json
+
+# Local build and lint output
+build/
+dist/
+.ruff_cache/

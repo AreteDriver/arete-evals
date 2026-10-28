@@ -14,7 +14,7 @@
 | Fail | 0 | 0% |
 | Flaky | 0 | 0% |
 
-All five cases originally marked `failed` are confirmed **eval-metric false positives**, not product regressions. The fixed `regex_absence` pattern lives at [`suites/benchgoblins-ask.yaml:71-72`](../suites/benchgoblins-ask.yaml). [`scripts/verify_fix.py`](../scripts/verify_fix.py) reproduces the result against the stored outputs.
+All five cases originally marked `failed` were triaged as **eval-metric false positives**, not product regressions. The historical fixed pattern lives in [`case-studies/benchgoblins-ask/suite-v0.yaml`](../case-studies/benchgoblins-ask/suite-v0.yaml). [`scripts/verify_fix.py`](../scripts/verify_fix.py) rechecks the retained 500-character output prefixes; it does not establish false-negative performance.
 
 ---
 
@@ -75,7 +75,7 @@ Fixed pattern (anchored to the escaped-JSON-key shape that the `5c2cf48` regress
 "rationale"\s*:\s*"(?:[^"\\]|\\.)*\\"recommendations\\"\s*:
 ```
 
-A leaked JSON key inside a rationale string renders as `\"recommendations\":` after escaping; prose never does. **0/20 false positives** under the fixed pattern against the same stored responses. Full eval suite still green at 391.
+A leaked JSON key inside a rationale string renders as `\"recommendations\":` after escaping; prose does not. The fixed pattern produces **0/20 hits** against the retained output prefixes. The canonical v1 fixtures now test both known-good and known-bad shapes.
 
 ## Separate observation (not a fix to this suite)
 
@@ -83,6 +83,6 @@ All five originally-failed cases are the model correctly recognizing it is May 2
 
 ## Action items
 
-- [x] Apply fixed `regex_absence` pattern to `suites/benchgoblins-ask.yaml` (done — commit landed in initial repo push)
-- [x] Verify against stored responses via `scripts/verify_fix.py` (done — 0/20 false positives, no false negatives)
-- [ ] Re-run `benchgoblins-ask` live to produce a new run record with the fixed pattern in place (next live run will replace this one as the canonical artifact)
+- [x] Preserve the fixed historical pattern in `case-studies/benchgoblins-ask/suite-v0.yaml`
+- [x] Recheck retained prefixes via `scripts/verify_fix.py` (done — 0/20 hits; no false-negative claim)
+- [ ] Produce a canonical v1 public-project bundle using the current structured-response suite and complete provenance

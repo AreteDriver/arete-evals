@@ -1,0 +1,60 @@
+{
+  "baseline_variant": "baseline",
+  "candidate_variant": "candidate",
+  "deltas": [
+    {
+      "baseline": 0.3,
+      "candidate": 1.0,
+      "delta": 0.7,
+      "metric": "contract_pass"
+    },
+    {
+      "baseline": 0.8,
+      "candidate": 1.0,
+      "delta": 0.19999999999999996,
+      "metric": "decision_valid"
+    },
+    {
+      "baseline": 0.8,
+      "candidate": 1.0,
+      "delta": 0.19999999999999996,
+      "metric": "details_valid"
+    },
+    {
+      "baseline": 0.7,
+      "candidate": 1.0,
+      "delta": 0.30000000000000004,
+      "metric": "no_serialized_json_leak"
+    },
+    {
+      "baseline": 1.0,
+      "candidate": 1.0,
+      "delta": 0.0,
+      "metric": "rationale_valid"
+    },
+    {
+      "baseline": 1.0,
+      "candidate": 1.0,
+      "delta": 0.0,
+      "metric": "schema_valid"
+    }
+  ],
+  "guardrails": [
+    {
+      "detail": "1.0000 ok",
+      "metric": "contract_pass",
+      "passed": true
+    },
+    {
+      "detail": "1.0000 ok",
+      "metric": "no_serialized_json_leak",
+      "passed": true
+    }
+  ],
+  "project": "arete-evals",
+  "suite": "structured-response-integrity",
+  "summary": "contract_pass improved",
+  "verdict": "pass",
+  "win": "improved",
+  "win_metric": "contract_pass"
+}

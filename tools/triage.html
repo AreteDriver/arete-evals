@@ -882,7 +882,7 @@ function renderCard(c) {
   if (c.metrics) {
     const failed = Object.entries(c.metrics).filter(([, v]) => typeof v === 'number' && v < 1.0);
     if (failed.length > 0) {
-      failedGates = `<span class="pass-flag no" title="failed metrics">⚠ ${failed.map(([k]) => k).join(', ')}</span>`;
+      failedGates = `<span class="pass-flag no" title="failed metrics">⚠ ${failed.map(([k]) => escapeHtml(k)).join(', ')}</span>`;
     }
   }
   const cardLabel = c.name || c.id;
@@ -977,7 +977,7 @@ function openCase(id) {
     const rows = Object.entries(c.metrics).map(([k, v]) => {
       const val = typeof v === 'number' ? v.toFixed(2) : String(v);
       const cls = typeof v === 'number' && v < 1.0 ? 'no' : 'ok';
-      return `<tr><td><code>${escapeHtml(k)}</code></td><td><span class="pass-flag ${cls}">${val}</span></td></tr>`;
+      return `<tr><td><code>${escapeHtml(k)}</code></td><td><span class="pass-flag ${cls}">${escapeHtml(val)}</span></td></tr>`;
     }).join('');
     metricsHtml = `
       <div class="detail-section">
@@ -992,7 +992,7 @@ function openCase(id) {
   if (c.rubric_scores && Object.keys(c.rubric_scores).length > 0) {
     const rows = Object.entries(c.rubric_scores).map(([k, v]) => {
       const val = typeof v === 'number' ? v.toFixed(2) : String(v);
-      return `<tr><td><code>${escapeHtml(k)}</code></td><td>${val}</td></tr>`;
+      return `<tr><td><code>${escapeHtml(k)}</code></td><td>${escapeHtml(val)}</td></tr>`;
     }).join('');
     rubricHtml = `
       <div class="detail-section">
@@ -1013,7 +1013,7 @@ function openCase(id) {
     <div class="detail-meta">
       <span class="meta-pill"><strong>Score</strong> · ${scoreStr}</span>
       <span class="meta-pill"><strong>Status</strong> · ${escapeHtml(statusStr)}</span>
-      <span class="meta-pill"><strong>Bucket</strong> · ${c.bucket}</span>
+      <span class="meta-pill"><strong>Bucket</strong> · ${escapeHtml(c.bucket)}</span>
       ${tagPills.join('')}
     </div>
     ${c.prompt ? `

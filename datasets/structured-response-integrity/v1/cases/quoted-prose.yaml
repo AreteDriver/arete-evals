@@ -1,0 +1,6 @@
+id: quoted-prose
+labels: {slice: escaping, validity: expected-valid}
+input:
+  query: Include a quoted phrase in otherwise normal prose.
+expected:
+  rationale_min_chars: 20

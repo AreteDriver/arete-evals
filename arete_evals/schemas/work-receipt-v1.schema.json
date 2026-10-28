@@ -1,0 +1,645 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Arete Work Receipt v1 (draft and finalized)",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/draft"
+    },
+    {
+      "$ref": "#/$defs/finalized"
+    }
+  ],
+  "$defs": {
+    "draft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "task_id",
+        "agent",
+        "repository",
+        "starting_revision",
+        "ending_revision",
+        "subject_artifact",
+        "files",
+        "tests",
+        "evaluations",
+        "findings",
+        "telemetry",
+        "provenance",
+        "confidence",
+        "human_review_required",
+        "artifacts"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "agent-work-receipt-v1"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$(?![\\s\\S])"
+        },
+        "agent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "model"
+          ],
+          "properties": {
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "model": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^https://[a-zA-Z0-9.-]+/[a-zA-Z0-9_./-]+$(?![\\s\\S])"
+        },
+        "starting_revision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ending_revision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^([a-f0-9]{40}|[a-f0-9]{64})$(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "subject_artifact": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "inspected",
+            "modified",
+            "tests_added"
+          ],
+          "properties": {
+            "inspected": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240,
+                    "pattern": "^[a-zA-Z0-9_./ -]+$(?![\\s\\S])"
+                  },
+                  "maxItems": 1000,
+                  "uniqueItems": true
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "modified": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240,
+                    "pattern": "^[a-zA-Z0-9_./ -]+$(?![\\s\\S])"
+                  },
+                  "maxItems": 1000,
+                  "uniqueItems": true
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tests_added": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240,
+                    "pattern": "^[a-zA-Z0-9_./ -]+$(?![\\s\\S])"
+                  },
+                  "maxItems": 1000,
+                  "uniqueItems": true
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "tests": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "command",
+                  "outcome",
+                  "counts",
+                  "evidence"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$(?![\\s\\S])"
+                  },
+                  "command": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000,
+                          "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+                        },
+                        "maxItems": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "outcome": {
+                    "enum": [
+                      "PASS",
+                      "FAIL",
+                      "WARNING",
+                      "UNKNOWN",
+                      "NOT_APPLICABLE",
+                      "SKIPPED"
+                    ]
+                  },
+                  "counts": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "passed",
+                          "failed",
+                          "errors",
+                          "skipped"
+                        ],
+                        "properties": {
+                          "passed": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1000000000000
+                          },
+                          "failed": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1000000000000
+                          },
+                          "errors": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1000000000000
+                          },
+                          "skipped": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 1000000000000
+                          }
+                        }
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "evidence": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$(?![\\s\\S])"
+                    },
+                    "maxItems": 100,
+                    "uniqueItems": true
+                  }
+                }
+              },
+              "maxItems": 100,
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evaluations": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "outcome",
+                  "evidence"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$(?![\\s\\S])"
+                  },
+                  "outcome": {
+                    "enum": [
+                      "PASS",
+                      "FAIL",
+                      "WARNING",
+                      "UNKNOWN",
+                      "NOT_APPLICABLE",
+                      "SKIPPED"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$(?![\\s\\S])"
+                    },
+                    "maxItems": 100,
+                    "uniqueItems": true
+                  }
+                }
+              },
+              "maxItems": 100,
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "findings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scope_violations",
+            "regressions",
+            "security"
+          ],
+          "properties": {
+            "scope_violations": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+                  },
+                  "maxItems": 100,
+                  "uniqueItems": true
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "regressions": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+                  },
+                  "maxItems": 100,
+                  "uniqueItems": true
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "security": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+                  },
+                  "maxItems": 100,
+                  "uniqueItems": true
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "telemetry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "retries",
+            "human_interventions",
+            "input_tokens",
+            "output_tokens",
+            "elapsed_seconds",
+            "cost"
+          ],
+          "properties": {
+            "retries": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "human_interventions": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "input_tokens": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "output_tokens": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000000000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "elapsed_seconds": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1000000000000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cost": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "amount",
+                    "currency"
+                  ],
+                  "properties": {
+                    "amount": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1000000000000
+                    },
+                    "currency": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{3}$(?![\\s\\S])"
+                    }
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "recorded_at",
+            "recorder",
+            "method",
+            "source_run_id"
+          ],
+          "properties": {
+            "recorded_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "recorder": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000,
+              "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+            },
+            "method": {
+              "enum": [
+                "agent-reported",
+                "verifier-observed",
+                "human-recorded"
+              ]
+            },
+            "source_run_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "value",
+                "basis"
+              ],
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "basis": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "^(?=.*\\S)[^\\x00-\\x1f\\x7f]+$(?![\\s\\S])"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "human_review_required": {
+          "type": "boolean"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "path",
+              "sha256",
+              "bytes"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$(?![\\s\\S])"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240,
+                "pattern": "^[a-zA-Z0-9_./ -]+$(?![\\s\\S])"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$(?![\\s\\S])"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1048576
+              }
+            }
+          },
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      }
+    },
+    "finalized": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "receipt",
+        "integrity"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "finalized-work-receipt-v1"
+        },
+        "receipt": {
+          "$ref": "#/$defs/draft"
+        },
+        "integrity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "canonicalization",
+            "sha256"
+          ],
+          "properties": {
+            "algorithm": {
+              "const": "sha256"
+            },
+            "canonicalization": {
+              "const": "arete-json-v1"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$(?![\\s\\S])"
+            }
+          }
+        }
+      }
+    }
+  }
+}

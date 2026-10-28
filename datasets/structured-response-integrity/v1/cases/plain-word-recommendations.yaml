@@ -1,0 +1,6 @@
+id: plain-word-recommendations
+labels: {slice: false-positive-control, validity: expected-valid}
+input:
+  query: Use the ordinary word recommendations in the rationale.
+expected:
+  rationale_min_chars: 20

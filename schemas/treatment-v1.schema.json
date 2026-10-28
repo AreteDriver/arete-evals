@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aretedriver.dev/schemas/arete-evals/treatment-v1.schema.json",
+  "title": "Arete Evals Treatment v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "kind", "config"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "minLength": 1},
+    "kind": {
+      "enum": ["baseline", "skill", "mcp", "instructions", "subagent", "runtime"]
+    },
+    "config": {"type": "object"},
+    "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

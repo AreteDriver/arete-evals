@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch: {}
   push:
     branches: [main]
   pull_request:
@@ -8,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -16,7 +18,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
@@ -25,10 +27,43 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-ci.txt
       - name: Install validation dependency
-        run: python -m pip install --require-hashes -r requirements-ci.txt
+        run: |
+          python -m pip install -r requirements-ci.txt
+          python -m pip install --no-deps --no-build-isolation -e .
       - name: Compile validation scripts
-        run: python -m compileall -q scripts
-      - name: Validate suites and run records
-        run: python scripts/validate_repo.py
-      - name: Reproduce stored metric fix
-        run: python scripts/verify_fix.py
+        run: python -m compileall -q arete_evals scripts tests
+      - name: Verify project and retain evidence
+        run: python scripts/verify_project.py --out /tmp/arete-project-evidence
+      - name: Check installed wheel outside source tree
+        run: |
+          python -m pip wheel --no-deps --no-build-isolation . -w /tmp/arete-wheel
+          python -m venv /tmp/arete-installed
+          /tmp/arete-installed/bin/python -m pip install -r requirements-ci.txt /tmp/arete-wheel/*.whl
+          /tmp/arete-installed/bin/arete-evals receipt verify /tmp/arete-project-evidence/receipt.json --artifacts-root /tmp/arete-project-evidence
+          /tmp/arete-installed/bin/arete-evals receipt render /tmp/arete-project-evidence/receipt.json
+          cd /tmp
+          /tmp/arete-installed/bin/arete-evals project audit "$GITHUB_WORKSPACE" --require-clean
+      - name: Build canonical replay bundle
+        run: |
+          python -m arete_evals.cli run \
+            --suite suites/structured-response-integrity.yaml \
+            --out /tmp/arete-evals-runs \
+            --bundle-id ci-replay \
+            --created-at 2026-08-31T12:00:00+00:00
+          python -c "import json; from pathlib import Path; p=Path('/tmp/arete-evals-runs/ci-replay/manifest.json'); m=json.loads(p.read_text()); assert m['verdict']=='pass' and not m['outputs_truncated']"
+          python -m arete_evals.cli run \
+            --suite suites/context-hygiene-deep-analysis.yaml \
+            --out /tmp/arete-evals-runs \
+            --bundle-id ci-context-replay \
+            --created-at 2026-08-31T12:00:00+00:00
+          python -c "import json; from pathlib import Path; m=json.loads(Path('/tmp/arete-evals-runs/ci-context-replay/manifest.json').read_text()); assert m['verdict']=='pass'"
+      - name: Summarize verification evidence
+        if: always()
+        run: |
+          for path in /tmp/arete-project-evidence /tmp/arete-evals-runs; do
+            if [ -e "$path" ]; then
+              find "$path" -maxdepth 2 -type f -print | sort
+            else
+              echo "missing: $path"
+            fi
+          done

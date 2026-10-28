@@ -1,0 +1,10 @@
+[
+  {"name":"missing-current-state","remove":"STATUS.md","code":"authority.invalid"},
+  {"name":"conflicting-readme","write":"README.md","text":"A deliberately conflicting README with sufficient content.\n<!-- arete:package_version=9.9.9 -->\n","code":"claim.conflict"},
+  {"name":"missing-provenance","remove":"pyproject.toml","code":"claim.evidence"},
+  {"name":"stale-roadmap-review","set":["project","last_reviewed"],"value":"2020-01-01","code":"review.stale"},
+  {"name":"invalid-manifest","set":["schema_version"],"value":"project-manifest-v99","code":"manifest.invalid"},
+  {"name":"malicious-path","set":["authority","current_state","path"],"value":"../outside.md","code":"manifest.invalid"},
+  {"name":"scope-violation","set":["agent","allowed_paths"],"value":["../../"],"code":"manifest.invalid"},
+  {"name":"missing-test-command","set":["verification","tests"],"value":null,"code":"tests.missing"}
+]

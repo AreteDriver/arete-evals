@@ -1,0 +1,63 @@
+{
+  "schema_version": "project-map-v1",
+  "project_id": "arete-evals",
+  "name": "Arete Evals",
+  "purpose": "Provide bounded verification evidence for claimed requirements",
+  "repository": "https://github.com/AreteDriver/arete-evals",
+  "source_revision": null,
+  "observed_on": "2026-10-27",
+  "kind": "static-documentation-draft",
+  "automatic_refresh": false,
+  "source_of_truth": "PROJECT_MANIFEST.yaml and canonical documents in this repository",
+  "owners": {
+    "verification": "Arete Evals",
+    "execution": "Forgehand (planned contract)",
+    "routing_budget_escalation": "Supervisor (planned contract)",
+    "transport": "Conduit (planned contract)",
+    "durable_history_ci": "GitHub"
+  },
+  "flow": [
+    "project manifest",
+    "deterministic audit",
+    "evidence and explicit conditions"
+  ],
+  "inputs": [
+    "repository files",
+    "PROJECT_MANIFEST.yaml",
+    "fixed Git probes"
+  ],
+  "outputs": [
+    "project-audit-v1 JSON",
+    "text report",
+    "local acceptance evidence",
+    "finalized-work-receipt-v1 JSON",
+    "receipt-verification-v1 JSON"
+  ],
+  "current": [
+    "local CLI",
+    "external evalcore replay",
+    "candidate CI definition",
+    "local Work Receipts and fixed-verifier producer"
+  ],
+  "planned": [
+    "authenticated artifact attestations",
+    "evaluation packs",
+    "ecosystem contracts"
+  ],
+  "existing_workflows": null,
+  "credential_references": [],
+  "side_effects": [],
+  "evidence": [
+    "docs/BASELINE.md",
+    "docs/evidence/milestone-a.json",
+    "docs/PROJECT_AUDIT.md",
+    "docs/WORK_RECEIPTS.md"
+  ],
+  "limitations": [
+    "draft prepared before final commit; use Git history for revision",
+    "no live n8n changes authorized in this run",
+    "no operational integration is represented"
+  ],
+  "next_action": "After review, reconcile with the existing portfolio map and save an inactive projection",
+  "synchronization_status": "pending; local draft only"
+}

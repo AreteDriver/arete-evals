@@ -1,0 +1,101 @@
+superseded-instruction:
+  baseline:
+    report:
+      total_segments: 3
+      grade: B
+      mode: fast
+      staleness_results:
+        - {segment_index: 0, score: 0.2, reasons: [early position]}
+        - {segment_index: 1, score: 0.1, reasons: []}
+        - {segment_index: 2, score: 0.2, reasons: [correction/update]}
+      contradictions:
+        - {segment_a: 0, segment_b: 2, description: conflicting SQLite instructions, confidence: 0.7}
+      deadweight: []
+      compression_candidates: []
+  candidate:
+    report:
+      total_segments: 3
+      grade: B
+      mode: deep
+      staleness_results:
+        - {segment_index: 0, score: 0.9, reasons: [superseded by PostgreSQL decision]}
+      contradictions: []
+      deadweight: []
+      compression_candidates: []
+explicit-contradiction:
+  baseline:
+    report:
+      total_segments: 2
+      grade: B
+      mode: fast
+      staleness_results:
+        - {segment_index: 0, score: 0.2, reasons: [early position]}
+        - {segment_index: 1, score: 0.0, reasons: []}
+      contradictions:
+        - {segment_a: 0, segment_b: 1, description: conflicting output formats, confidence: 0.7}
+      deadweight: []
+      compression_candidates: []
+  candidate:
+    report:
+      total_segments: 2
+      grade: B
+      mode: deep
+      staleness_results: []
+      contradictions:
+        - {segment_a: 0, segment_b: 1, description: incompatible output formats, confidence: 0.95}
+      deadweight: []
+      compression_candidates: []
+deadweight-acknowledgment:
+  baseline:
+    report:
+      total_segments: 3
+      grade: A
+      mode: fast
+      staleness_results:
+        - {segment_index: 0, score: 0.2, reasons: [early position]}
+        - {segment_index: 1, score: 0.2, reasons: [very short mid-conversation message]}
+        - {segment_index: 2, score: 0.0, reasons: []}
+      contradictions: []
+      deadweight: []
+      compression_candidates: []
+  candidate:
+    report:
+      total_segments: 3
+      grade: B
+      mode: deep
+      staleness_results: []
+      contradictions: []
+      deadweight:
+        - {segment_index: 1, reason: acknowledgment only, tokens_recoverable: 6}
+      compression_candidates: []
+compression-run:
+  baseline:
+    report:
+      total_segments: 4
+      grade: C
+      mode: fast
+      staleness_results:
+        - {segment_index: 0, score: 0.2, reasons: [early position]}
+        - {segment_index: 1, score: 0.433, reasons: [short update]}
+        - {segment_index: 2, score: 0.367, reasons: [short update]}
+        - {segment_index: 3, score: 0.2, reasons: [correction/update]}
+      contradictions: []
+      deadweight: []
+      compression_candidates:
+        - segment_indices: [1, 2, 3]
+          current_tokens: 21
+          estimated_compressed_tokens: 10
+          reason: 3 consecutive assistant messages
+  candidate:
+    report:
+      total_segments: 4
+      grade: B
+      mode: deep
+      staleness_results: []
+      contradictions: []
+      deadweight: []
+      compression_candidates:
+        - segment_indices: [1, 2, 3]
+          current_tokens: 24
+          estimated_compressed_tokens: 10
+          reason: consecutive status updates

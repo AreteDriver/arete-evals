@@ -1,0 +1,20 @@
+id: distinct-status-updates
+labels: {slice: compression-near-miss, source: curated, polarity: negative}
+input:
+  extension: .md
+  content: |
+    ## User
+    Report the current incident state and the next action.
+
+    ## Assistant
+    The API is returning HTTP 503 errors in the us-west region.
+
+    ## Assistant
+    The next action is to shift traffic to us-east and notify the incident lead.
+expected:
+  total_segments: 3
+  minimum_staleness_score: 0.5
+  stale_indices: []
+  contradiction_pairs: []
+  deadweight_indices: []
+  compression_groups: []

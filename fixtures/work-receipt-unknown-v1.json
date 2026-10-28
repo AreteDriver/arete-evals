@@ -1,0 +1,41 @@
+{
+  "schema_version": "agent-work-receipt-v1",
+  "task_id": "example-unknown",
+  "agent": {
+    "name": null,
+    "model": null
+  },
+  "repository": "https://github.com/AreteDriver/arete-evals",
+  "starting_revision": null,
+  "ending_revision": null,
+  "subject_artifact": null,
+  "files": {
+    "inspected": null,
+    "modified": null,
+    "tests_added": null
+  },
+  "tests": null,
+  "evaluations": null,
+  "findings": {
+    "scope_violations": null,
+    "regressions": null,
+    "security": null
+  },
+  "telemetry": {
+    "retries": null,
+    "human_interventions": null,
+    "input_tokens": null,
+    "output_tokens": null,
+    "elapsed_seconds": null,
+    "cost": null
+  },
+  "provenance": {
+    "recorded_at": "2026-10-27T00:00:00Z",
+    "recorder": "documentation-example",
+    "method": "agent-reported",
+    "source_run_id": null
+  },
+  "confidence": null,
+  "human_review_required": true,
+  "artifacts": []
+}

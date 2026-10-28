@@ -1,0 +1,17 @@
+id: superseded-instruction
+labels: {slice: staleness, source: curated}
+input:
+  extension: .md
+  content: |
+    ## User
+    Use SQLite for persistence in the implementation.
+
+    ## Assistant
+    I will implement the persistence layer with SQLite.
+
+    ## User
+    Actually, replace that decision: use PostgreSQL and do not use SQLite.
+expected:
+  total_segments: 3
+  required_stale_indices: [0]
+  minimum_staleness_score: 0.5
